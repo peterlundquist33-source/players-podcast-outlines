@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build podcast outline pages from a Google Sheet export (tools/wk*.json)."""
-import json, html, sys, pathlib
+import json, html, re, sys, pathlib
 
 ORDER = ["THURSDAY NIGHT GAME", "SUNDAY NOON GAME", "SUNDAY AFTERNOON GAME",
          "SUNDAY NIGHT GAME", "MONDAY NIGHT GAME"]
@@ -63,13 +63,24 @@ def rows_from(V, start, cols, stop_blank=True):
 
 E = html.escape
 
+def total(agenda):
+    """Sum m:ss agenda durations -> 'M:SS'."""
+    secs = 0
+    for _, t in agenda:
+        m = re.match(r"^\s*(\d+):(\d{2})\s*$", t or "")
+        if m:
+            secs += int(m.group(1)) * 60 + int(m.group(2))
+    return f"{secs // 60}:{secs % 60:02d}"
+
 def page(V, week, season):
     b = matchups(V)
     guest = cell(V, 5, "B")
     song = cell(V, 5, "C")
     rec = cell(V, 2, "E")
+    SKIP = ("overreaction", "total time")
     agenda = [(cell(V, r, "E"), cell(V, r, "F")) for r in range(4, 14)
-              if cell(V, r, "E")]
+              if cell(V, r, "E")
+              and not any(k in cell(V, r, "E").lower() for k in SKIP)]
     awards = [(cell(V, r, "B"), cell(V, r, "C"), cell(V, r, "E"))
               for r in range(21, 25) if cell(V, r, "B")]
     totw_meta = [(cell(V, r, "B"), cell(V, r, "C")) for r in range(28, 34)
@@ -78,8 +89,6 @@ def page(V, week, season):
                    for r in range(29, 38) if cell(V, r, "D")]
     impact = [(cell(V, r, "B"), cell(V, r, "C")) for r in range(35, 40)
               if cell(V, r, "C")]
-    over = [(cell(V, r, "I"), cell(V, r, "J")) for r in range(41, 48)
-            if cell(V, r, "J")]
     hotseat = [cell(V, r, "B") for r in range(15, 18) if cell(V, r, "B")]
 
     P = []
@@ -101,7 +110,9 @@ def page(V, week, season):
         A('<section class="card agenda"><h2>Agenda</h2><ol>')
         for name, t in agenda:
             A(f'<li><span>{E(name)}</span><em>{E(t)}</em></li>')
-        A('</ol></section>')
+        A('</ol>')
+        A(f'<p class="total"><span>Total</span><em>{E(total(agenda))}</em></p>')
+        A('</section>')
 
     A('<h2 class="hdr">Matchups</h2>')
     for m in b:
@@ -121,12 +132,6 @@ def page(V, week, season):
             A(f'<p class="h2h"><b>All-time H2H</b> {E(m["h2h"])}</p>')
         A('<p class="pick"><b>Your pick</b> <span class="blank">—</span></p>')
         A('</section>')
-
-    if over:
-        A('<section class="card"><h2>Week 2 Overreactions</h2><ol class="over">')
-        for n, t in over:
-            A(f'<li>{E(t)}</li>')
-        A('</ol></section>')
 
     if awards:
         A('<section class="card"><h2>Weekly Awards</h2><dl class="awards">')
