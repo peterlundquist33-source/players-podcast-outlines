@@ -5,6 +5,23 @@ import json, html, re, sys, pathlib
 ORDER = ["THURSDAY NIGHT GAME", "SUNDAY NOON GAME", "SUNDAY AFTERNOON GAME",
          "SUNDAY NIGHT GAME", "MONDAY NIGHT GAME"]
 
+# Team name -> owner. Keeps picks working even when a team gets renamed.
+OWNERS = {
+    "Uncut Cokerr": "Adam", "Joey Lunchbox": "Leif", "The Aura Farm": "Christian",
+    "The Basement Of KK": "Peter", "Runnin' Rezac": "Logan", "Pukachu": "John",
+    "Amon that inhaler": "Grant", "PA Dive Your Way": "Kaleb",
+    "Finding Nico": "Mitchell", "A Slap in the Face": "Isaac",
+    "Maye Be Cook'd": "Noah", "Taylor Gang": "CJ",
+}
+# Names the sheet still has under an old label.
+RENAMES = {"Achane Smokin CiGarretts": "Maye Be Cook'd",
+           "Burrowed Treasure": "Taylor Gang"}
+
+# Peter's weekly picks, by owner.
+PICKS = {
+    3: ["Logan", "CJ", "Grant", "Kaleb", "Christian", "Leif"],
+}
+
 def load(path):
     return (json.load(open(path)).get("values") or [])
 
@@ -28,6 +45,9 @@ def rosters(txt):
             out.append(cur)
     return out
 
+def fix_team(name):
+    return RENAMES.get(name.strip(), name.strip())
+
 def strip_label(txt, label):
     t = txt.strip()
     return t[len(label):].strip() if t.upper().startswith(label) else t
@@ -41,13 +61,22 @@ def matchups(V):
                 continue
             blocks.append({
                 "slot": slot,
-                "away": cell(V, r + 1, L),
-                "home": cell(V, r + 1, R),
+                "away": fix_team(cell(V, r + 1, L)),
+                "home": fix_team(cell(V, r + 1, R)),
                 "rosters": rosters(cell(V, r + 2, L)),
                 "trend": strip_label(cell(V, r + 3, L), "TREND / STAT"),
                 "h2h": strip_label(cell(V, r + 4, L), "ALL-TIME H2H"),
             })
     blocks.sort(key=lambda b: ORDER.index(b["slot"]) if b["slot"] in ORDER else 99)
+    return blocks
+
+def attach_picks(blocks, week):
+    picks = PICKS.get(int(week), [])
+    for i, b in enumerate(blocks):
+        owner = picks[i] if i < len(picks) else ""
+        b["pick_owner"] = owner
+        b["pick_team"] = next(
+            (t for t in (b["away"], b["home"]) if OWNERS.get(t) == owner), "")
     return blocks
 
 def rows_from(V, start, cols, stop_blank=True):
@@ -63,6 +92,9 @@ def rows_from(V, start, cols, stop_blank=True):
 
 E = html.escape
 
+def slug(t):
+    return re.sub(r"[^a-z0-9]+", "-", t.lower()).strip("-")
+
 def total(agenda):
     """Sum m:ss agenda durations -> 'M:SS'."""
     secs = 0
@@ -73,7 +105,7 @@ def total(agenda):
     return f"{secs // 60}:{secs % 60:02d}"
 
 def page(V, week, season):
-    b = matchups(V)
+    b = attach_picks(matchups(V), week)
     guest = cell(V, 5, "B")
     song = cell(V, 5, "C")
     rec = cell(V, 2, "E")
@@ -98,7 +130,20 @@ def page(V, week, season):
     A(f'<meta name="robots" content="noindex,nofollow">')
     A(f'<title>Week {week} — Players FF Podcast Outline</title>')
     A('<link rel="stylesheet" href="style.css"></head><body>')
-    A('<header class="top"><a class="back" href="index.html">← All weeks</a>')
+    nav = [("Agenda", "agenda")] if agenda else []
+    for m in b:
+        nav.append((f'{m["slot"].replace(" GAME","").title()} · {m["away"]} v {m["home"]}',
+                    slug(m["away"] + "-" + m["home"])))
+    if awards:      nav.append(("Weekly Awards", "awards"))
+    if totw_roster: nav.append(("Team of the Week", "totw"))
+    if hotseat:     nav.append(("Hot Seat", "hotseat"))
+
+    A('<div class="bar"><a class="back" href="index.html">← Weeks</a>')
+    A('<details class="menu"><summary>Jump to<span class="car">▾</span></summary><nav>')
+    for label, sid in nav:
+        A(f'<a href="#{sid}">{E(label)}</a>')
+    A('</nav></details></div>')
+    A('<header class="top">')
     A(f'<h1>Week {week}<span class="yr">{season}</span></h1>')
     A('<div class="meta">')
     if rec:   A(f'<span><b>Recording</b> {E(rec)}</span>')
@@ -107,7 +152,7 @@ def page(V, week, season):
     A('</div></header><main>')
 
     if agenda:
-        A('<section class="card agenda"><h2>Agenda</h2><ol>')
+        A('<section id="agenda" class="card agenda"><h2>Agenda</h2><ol>')
         for name, t in agenda:
             A(f'<li><span>{E(name)}</span><em>{E(t)}</em></li>')
         A('</ol>')
@@ -116,7 +161,7 @@ def page(V, week, season):
 
     A('<h2 class="hdr">Matchups</h2>')
     for m in b:
-        A('<section class="card game">')
+        A(f'<section id="{slug(m["away"] + "-" + m["home"])}" class="card game">')
         A(f'<div class="slot">{E(m["slot"].replace(" GAME",""))}</div>')
         A(f'<h3>{E(m["away"])} <i>vs</i> {E(m["home"])}</h3>')
         A('<div class="teams">')
@@ -130,17 +175,21 @@ def page(V, week, season):
             A(f'<p class="trend"><b>Trend / stat</b>{E(m["trend"])}</p>')
         if m["h2h"]:
             A(f'<p class="h2h"><b>All-time H2H</b> {E(m["h2h"])}</p>')
-        A('<p class="pick"><b>Your pick</b> <span class="blank">—</span></p>')
+        if m.get("pick_team"):
+            A(f'<p class="pick"><b>Pick</b> <span class="won">{E(m["pick_team"])}</span>'
+              f'<span class="ow">{E(m["pick_owner"])}</span></p>')
+        else:
+            A('<p class="pick"><b>Pick</b> <span class="blank">—</span></p>')
         A('</section>')
 
     if awards:
-        A('<section class="card"><h2>Weekly Awards</h2><dl class="awards">')
+        A('<section id="awards" class="card"><h2>Weekly Awards</h2><dl class="awards">')
         for label, body, who in awards:
             A(f'<dt>{E(label)}</dt><dd>{E(body)}<span class="who">{E(who)}</span></dd>')
         A('</dl></section>')
 
     if totw_roster:
-        A('<section class="card"><h2>Team of the Week</h2>')
+        A('<section id="totw" class="card"><h2>Team of the Week</h2>')
         if totw_meta:
             A('<dl class="kv">')
             for k, v in totw_meta:
@@ -158,7 +207,7 @@ def page(V, week, season):
         A('</section>')
 
     if hotseat:
-        A('<section class="card"><h2>Hot Seat</h2><ul>')
+        A('<section id="hotseat" class="card"><h2>Hot Seat</h2><ul>')
         for h in hotseat:
             A(f'<li>{E(h)}</li>')
         A('</ul></section>')
