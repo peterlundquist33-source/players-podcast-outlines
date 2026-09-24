@@ -64,7 +64,6 @@ def matchups(V):
                 "away": fix_team(cell(V, r + 1, L)),
                 "home": fix_team(cell(V, r + 1, R)),
                 "rosters": rosters(cell(V, r + 2, L)),
-                "trend": strip_label(cell(V, r + 3, L), "TREND / STAT"),
                 "h2h": strip_label(cell(V, r + 4, L), "ALL-TIME H2H"),
             })
     blocks.sort(key=lambda b: ORDER.index(b["slot"]) if b["slot"] in ORDER else 99)
@@ -245,8 +244,6 @@ def page(V, week, season, deep=()):
         dm = match_deep(m, deep)
         if dm:
             render_deep(A, E, dm, slug)
-        if m["trend"]:
-            A(f'<p class="trend"><b>Trend / stat</b>{E(m["trend"])}</p>')
         if m["h2h"]:
             A(f'<p class="h2h"><b>All-time H2H</b> {E(m["h2h"])}</p>')
         if m.get("pick_team"):
