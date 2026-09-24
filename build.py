@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Build podcast outline pages from a Google Sheet export (tools/wk*.json)."""
+import json, html, sys, pathlib
+
+ORDER = ["THURSDAY NIGHT GAME", "SUNDAY NOON GAME", "SUNDAY AFTERNOON GAME",
+         "SUNDAY NIGHT GAME", "MONDAY NIGHT GAME"]
+
+def load(path):
+    return (json.load(open(path)).get("values") or [])
+
+def cell(V, r, c):
+    ci = ord(c) - 65
+    row = V[r - 1] if r - 1 <= len(V) - 1 else []
+    return str(row[ci]).strip() if ci < len(row) and row[ci] is not None else ""
+
+def rosters(txt):
+    """One cell holds both rosters, separated by a blank line."""
+    out, cur = [], None
+    for line in txt.split("\n"):
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("•"):
+            if cur:
+                cur[1].append(s.lstrip("• ").strip())
+        else:
+            cur = (s, [])
+            out.append(cur)
+    return out
+
+def strip_label(txt, label):
+    t = txt.strip()
+    return t[len(label):].strip() if t.upper().startswith(label) else t
+
+def matchups(V):
+    blocks = []
+    for r in (4, 17, 30):
+        for L, R in (("I", "K"), ("N", "P")):
+            slot = cell(V, r, L)
+            if not slot:
+                continue
+            blocks.append({
+                "slot": slot,
+                "away": cell(V, r + 1, L),
+                "home": cell(V, r + 1, R),
+                "rosters": rosters(cell(V, r + 2, L)),
+                "trend": strip_label(cell(V, r + 3, L), "TREND / STAT"),
+                "h2h": strip_label(cell(V, r + 4, L), "ALL-TIME H2H"),
+            })
+    blocks.sort(key=lambda b: ORDER.index(b["slot"]) if b["slot"] in ORDER else 99)
+    return blocks
+
+def rows_from(V, start, cols, stop_blank=True):
+    out = []
+    r = start
+    while r <= len(V):
+        vals = [cell(V, r, c) for c in cols]
+        if stop_blank and not any(vals):
+            break
+        out.append(vals)
+        r += 1
+    return out
+
+E = html.escape
+
+def page(V, week, season):
+    b = matchups(V)
+    guest = cell(V, 5, "B")
+    song = cell(V, 5, "C")
+    rec = cell(V, 2, "E")
+    agenda = [(cell(V, r, "E"), cell(V, r, "F")) for r in range(4, 14)
+              if cell(V, r, "E")]
+    awards = [(cell(V, r, "B"), cell(V, r, "C"), cell(V, r, "E"))
+              for r in range(21, 25) if cell(V, r, "B")]
+    totw_meta = [(cell(V, r, "B"), cell(V, r, "C")) for r in range(28, 34)
+                 if cell(V, r, "B")]
+    totw_roster = [(cell(V, r, "D"), cell(V, r, "E"), cell(V, r, "F"), cell(V, r, "G"))
+                   for r in range(29, 38) if cell(V, r, "D")]
+    impact = [(cell(V, r, "B"), cell(V, r, "C")) for r in range(35, 40)
+              if cell(V, r, "C")]
+    over = [(cell(V, r, "I"), cell(V, r, "J")) for r in range(41, 48)
+            if cell(V, r, "J")]
+    hotseat = [cell(V, r, "B") for r in range(15, 18) if cell(V, r, "B")]
+
+    P = []
+    A = P.append
+    A(f'<!doctype html><html lang="en"><head><meta charset="utf-8">')
+    A(f'<meta name="viewport" content="width=device-width,initial-scale=1">')
+    A(f'<meta name="robots" content="noindex,nofollow">')
+    A(f'<title>Week {week} — Players FF Podcast Outline</title>')
+    A('<link rel="stylesheet" href="style.css"></head><body>')
+    A('<header class="top"><a class="back" href="index.html">← All weeks</a>')
+    A(f'<h1>Week {week}<span class="yr">{season}</span></h1>')
+    A('<div class="meta">')
+    if rec:   A(f'<span><b>Recording</b> {E(rec)}</span>')
+    if guest: A(f'<span><b>Guest</b> {E(guest)}</span>')
+    if song:  A(f'<span><b>Intro</b> {E(song)}</span>')
+    A('</div></header><main>')
+
+    if agenda:
+        A('<section class="card agenda"><h2>Agenda</h2><ol>')
+        for name, t in agenda:
+            A(f'<li><span>{E(name)}</span><em>{E(t)}</em></li>')
+        A('</ol></section>')
+
+    A('<h2 class="hdr">Matchups</h2>')
+    for m in b:
+        A('<section class="card game">')
+        A(f'<div class="slot">{E(m["slot"].replace(" GAME",""))}</div>')
+        A(f'<h3>{E(m["away"])} <i>vs</i> {E(m["home"])}</h3>')
+        A('<div class="teams">')
+        for tname, players in m["rosters"]:
+            A(f'<div class="team"><h4>{E(tname)}</h4><ul>')
+            for p in players:
+                A(f'<li>{E(p)}</li>')
+            A('</ul></div>')
+        A('</div>')
+        if m["trend"]:
+            A(f'<p class="trend"><b>Trend / stat</b>{E(m["trend"])}</p>')
+        if m["h2h"]:
+            A(f'<p class="h2h"><b>All-time H2H</b> {E(m["h2h"])}</p>')
+        A('<p class="pick"><b>Your pick</b> <span class="blank">—</span></p>')
+        A('</section>')
+
+    if over:
+        A('<section class="card"><h2>Week 2 Overreactions</h2><ol class="over">')
+        for n, t in over:
+            A(f'<li>{E(t)}</li>')
+        A('</ol></section>')
+
+    if awards:
+        A('<section class="card"><h2>Weekly Awards</h2><dl class="awards">')
+        for label, body, who in awards:
+            A(f'<dt>{E(label)}</dt><dd>{E(body)}<span class="who">{E(who)}</span></dd>')
+        A('</dl></section>')
+
+    if totw_roster:
+        A('<section class="card"><h2>Team of the Week</h2>')
+        if totw_meta:
+            A('<dl class="kv">')
+            for k, v in totw_meta:
+                A(f'<dt>{E(k)}</dt><dd>{E(v)}</dd>')
+            A('</dl>')
+        A('<table><thead><tr><th>Pos</th><th>Player</th><th>Rd</th><th>Rank</th></tr></thead><tbody>')
+        for pos, nm, rd, rk in totw_roster:
+            A(f'<tr><td>{E(pos)}</td><td>{E(nm)}</td><td>{E(rd)}</td><td>{E(rk)}</td></tr>')
+        A('</tbody></table>')
+        if impact:
+            A('<h4>Impact players</h4><ol class="impact">')
+            for n, t in impact:
+                A(f'<li>{E(t)}</li>')
+            A('</ol>')
+        A('</section>')
+
+    if hotseat:
+        A('<section class="card"><h2>Hot Seat</h2><ul>')
+        for h in hotseat:
+            A(f'<li>{E(h)}</li>')
+        A('</ul></section>')
+
+    A('</main><footer>Players FF Podcast · outline</footer></body></html>')
+    return "\n".join(P)
+
+if __name__ == "__main__":
+    src, week, season, out = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+    V = load(src)
+    pathlib.Path(out).write_text(page(V, week, season))
+    print("wrote", out)
