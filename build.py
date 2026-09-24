@@ -104,7 +104,78 @@ def total(agenda):
             secs += int(m.group(1)) * 60 + int(m.group(2))
     return f"{secs // 60}:{secs % 60:02d}"
 
-def page(V, week, season):
+def render_deep(A, E, m, slug):
+    """Lineup card + window split + season form for one matchup."""
+    W = ["Thu", "Sun Noon", "Sun Aft", "SNF", "MNF"]
+
+    fa, fh = m["form"]["away"], m["form"]["home"]
+    if fa and fh:
+        A('<div class="form">')
+        for f, who in ((fa, m["away_owner"]), (fh, m["home_owner"])):
+            A('<div><b>#%d</b> %s · %s (%s) · %.1f ppg · all-play %s · luck %+.1f</div>'
+              % (f["rank"], E(who), E(f["record"]), E(f["streak"]),
+                 f["ppg"], E(f["allplay"]), f["luck"]))
+        A('</div>')
+
+    def nm(pl):
+        if not pl:
+            return '<span class="dim">—</span>'
+        flag = ' <i class="inj" title="%s">!</i>' % E(pl["injury"]) if pl["injury"] else ''
+        return '%s <span class="dim">%s</span>%s' % (E(pl["name"]), E(pl["pro"]), flag)
+
+    A('<table class="lc"><thead><tr>')
+    A('<th class="l">%s</th><th class="c">Proj</th><th class="c">Slot</th>'
+      '<th class="c">Proj</th><th class="r">%s</th></tr></thead><tbody>'
+      % (E(m["away"]), E(m["home"])))
+    for row in m["lineup"]:
+        a, h = row["a"], row["h"]
+        ca = ' win' if row["edge"] > 0 else ''
+        ch = ' win' if row["edge"] < 0 else ''
+        pa = '%.1f' % a["proj"] if a else '—'
+        ph = '%.1f' % h["proj"] if h else '—'
+        A('<tr><td class="l%s">%s</td><td class="c%s">%s</td>'
+          '<td class="c slotc">%s</td>'
+          '<td class="c%s">%s</td><td class="r%s">%s</td></tr>'
+          % (ca, nm(a), ca, pa, E(row["slot"]), ch, ph, ch, nm(h)))
+    A('<tr class="tot"><td class="l">Projected</td><td class="c">%.1f</td>'
+      '<td class="c"></td><td class="c">%.1f</td><td class="r">Projected</td></tr>'
+      % (m["away_proj"], m["home_proj"]))
+    A('</tbody></table>')
+
+    A('<div class="win"><h5>Points by game window</h5><table class="wt"><thead><tr><th></th>')
+    for w in W:
+        A('<th>%s</th>' % w)
+    A('</tr></thead><tbody>')
+    for side, who in (("away", m["away_owner"]), ("home", m["home_owner"])):
+        vals = m["windows"][side]
+        peak = max(vals.values()) if vals else 0
+        A('<tr><td class="who">%s</td>' % E(who))
+        for w in W:
+            v = vals.get(w, 0)
+            if not v:
+                A('<td class="zero">·</td>')
+            else:
+                A('<td class="%s">%.0f</td>' % ("hot" if v == peak else "", v))
+        A('</tr>')
+    A('</tbody></table></div>')
+
+
+def load_deep(path):
+    try:
+        return json.load(open(path))
+    except Exception:
+        return []
+
+def match_deep(block, deep):
+    """Find the deep record for a sheet matchup block, by owner pair."""
+    want = {OWNERS.get(block["away"]), OWNERS.get(block["home"])}
+    for m in deep:
+        if {m["away_owner"], m["home_owner"]} == want:
+            return m
+    return None
+
+
+def page(V, week, season, deep=()):
     b = attach_picks(matchups(V), week)
     guest = cell(V, 5, "B")
     song = cell(V, 5, "C")
@@ -171,6 +242,9 @@ def page(V, week, season):
                 A(f'<li>{E(p)}</li>')
             A('</ul></div>')
         A('</div>')
+        dm = match_deep(m, deep)
+        if dm:
+            render_deep(A, E, dm, slug)
         if m["trend"]:
             A(f'<p class="trend"><b>Trend / stat</b>{E(m["trend"])}</p>')
         if m["h2h"]:
@@ -217,6 +291,7 @@ def page(V, week, season):
 
 if __name__ == "__main__":
     src, week, season, out = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+    deep = load_deep(sys.argv[5]) if len(sys.argv) > 5 else []
     V = load(src)
-    pathlib.Path(out).write_text(page(V, week, season))
+    pathlib.Path(out).write_text(page(V, week, season, deep))
     print("wrote", out)
