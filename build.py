@@ -11,15 +11,49 @@ OWNERS = {
     "The Basement Of KK": "Peter", "Runnin' Rezac": "Logan", "Pukachu": "John",
     "Amon that inhaler": "Grant", "PA Dive Your Way": "Kaleb",
     "Finding Nico": "Mitchell", "A Slap in the Face": "Isaac",
-    "Maye Be Cook'd": "Noah", "Taylor Gang": "CJ",
+    "Maye Be Cook'd": "Noah", "Maye, Quit Football": "Noah", "Taylor Gang": "CJ",
 }
 # Names the sheet still has under an old label.
-RENAMES = {"Achane Smokin CiGarretts": "Maye Be Cook'd",
+RENAMES = {"Achane Smokin CiGarretts": "Maye, Quit Football",
+           "Maye Be Cook'd": "Maye, Quit Football",
            "Burrowed Treasure": "Taylor Gang"}
 
 # Peter's weekly picks, by owner.
 PICKS = {
     3: ["Logan", "CJ", "Grant", "Kaleb", "Christian", "Leif"],
+}
+
+# Completed Team of the Week profiles. These preserve a finished profile when
+# the source sheet is later rebuilt from its weekly template.
+TEAM_OF_WEEK = {
+    4: {
+        "meta": [
+            ("Team Name", "A Slap in the Face"),
+            ("Owner", "Isaac Douglas"),
+            ("Record", "2–1"),
+            ("Best Finish", "Runner-up, #2 seed, 11–3 (2022)"),
+            ("Playoff Appearances", "1"),
+            ("Fun Fact", "His only playoff trip was the inaugural 2022 season, when he went 11–3 and finished runner-up. A Slap in the Face has kept the same name all five seasons."),
+        ],
+        "roster": [
+            ("QB", "Bo Nix", "10", "QB #14"),
+            ("RB", "Javonte Williams", "2", "RB #11"),
+            ("RB", "Cam Skattebo", "5", "RB #20"),
+            ("WR", "Ja'Marr Chase", "1", "WR #8"),
+            ("WR", "Malik Nabers", "3", "WR #44"),
+            ("TE", "Dalton Kincaid", "12", "TE #5"),
+            ("FLEX", "Jaylen Warren", "7", "RB #17"),
+            ("D/ST", "Lions D/ST", "16", "D/ST #12"),
+            ("K", "Chris Boswell", "15", "K #6"),
+        ],
+        "impact": [
+            "Ja'Marr Chase — 54.5 through three weeks, WR #8; coming off 24.8 in Week 3",
+            "Javonte Williams — 50.5 through three weeks, RB #11; 18.3 in Week 3",
+            "Dalton Kincaid — 44.3 through three weeks, TE #5 as a 12th-round pick",
+            "Jaylen Warren — 40.6 through three weeks, RB #17 as a 7th-round pick",
+            "Cam Skattebo — 36.6 through three weeks, RB #20 as a 5th-round pick",
+        ],
+    },
 }
 
 def load(path):
@@ -198,6 +232,11 @@ def page(V, week, season, deep=()):
     impact = [(cell(V, r, "B"), cell(V, r, "C")) for r in range(35, 40)
               if cell(V, r, "C")]
     hotseat = [cell(V, r, "B") for r in range(15, 18) if cell(V, r, "B")]
+    totw_override = TEAM_OF_WEEK.get(int(week))
+    if totw_override:
+        totw_meta = totw_override["meta"]
+        totw_roster = totw_override["roster"]
+        impact = [("", text) for text in totw_override["impact"]]
 
     P = []
     A = P.append
