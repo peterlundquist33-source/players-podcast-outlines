@@ -148,13 +148,16 @@ def render_deep(A, E, m, slug):
     for side, who in (("away", m["away_owner"]), ("home", m["home_owner"])):
         vals = m["windows"][side]
         peak = max(vals.values()) if vals else 0
+        total = sum(vals.values()) or 0
         A('<tr><td class="who">%s</td>' % E(who))
         for w in W:
             v = vals.get(w, 0)
             if not v:
                 A('<td class="zero">·</td>')
             else:
-                A('<td class="%s">%.0f</td>' % ("hot" if v == peak else "", v))
+                pct = (v / total * 100) if total else 0
+                A('<td class="%s">%.0f<span class="pct">%.0f%%</span></td>'
+                  % ("hot" if v == peak else "", v, pct))
         A('</tr>')
     A('</tbody></table></div>')
 

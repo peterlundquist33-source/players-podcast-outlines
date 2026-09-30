@@ -111,3 +111,5 @@ background:#0a1730;border:1px solid var(--bg)}
 table.wt td.who{text-align:left;color:#cfdcf2;font-size:12.5px;background:transparent;white-space:nowrap}
 table.wt td.hot{color:var(--gold2);font-weight:700;background:#16305c}
 table.wt td.zero{color:#40507080}
+table.wt td .pct{display:block;font-size:10px;font-weight:400;color:var(--dim);margin-top:2px;letter-spacing:.4px}
+table.wt td.hot .pct{color:var(--gold)}
