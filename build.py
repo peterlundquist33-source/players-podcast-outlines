@@ -202,7 +202,15 @@ def page(V, week, season, deep=()):
     A(f'<meta name="viewport" content="width=device-width,initial-scale=1">')
     A(f'<meta name="robots" content="noindex,nofollow">')
     A(f'<title>Week {week} — Players FF Podcast Outline</title>')
-    A('<link rel="stylesheet" href="style.css"></head><body>')
+    cssv = ""
+    try:
+        import hashlib
+        cssv = "?v=" + hashlib.md5(
+            pathlib.Path(__file__).with_name("style.css").read_bytes()
+        ).hexdigest()[:8]
+    except Exception:
+        pass
+    A('<link rel="stylesheet" href="style.css%s"></head><body>' % cssv)
     nav = [("Agenda", "agenda")] if agenda else []
     for m in b:
         nav.append((f'{m["slot"].replace(" GAME","").title()} · {m["away"]} v {m["home"]}',
