@@ -12,12 +12,17 @@ def nfl_windows(season, week):
     req = urllib.request.Request(url, headers={
         "User-Agent": "Mozilla/5.0", "Accept": "application/json"})
     d = json.load(urllib.request.urlopen(req, timeout=25))
-    out, games = {}, []
+    out, games, opp = {}, [], {}
     for day, blk in sorted(d["content"]["schedule"].items()):
         for g in blk.get("games", []):
             comp = g["competitions"][0]
             iso = comp.get("date", "")            # e.g. 2026-09-28T00:20Z
             teams = [c["team"]["abbreviation"] for c in comp["competitors"]]
+            ha = {c.get("homeAway"): c["team"]["abbreviation"]
+                  for c in comp["competitors"]}
+            if ha.get("home") and ha.get("away"):
+                opp[ha["away"]] = "@" + ha["home"]
+                opp[ha["home"]] = "vs " + ha["away"]
             dow = day[-2:]                         # day of month
             hh = int(iso[11:13]) if len(iso) > 13 else 18
             # UTC -> window
@@ -36,7 +41,7 @@ def nfl_windows(season, week):
             for t in teams:
                 out[t] = w
             games.append((w, teams))
-    return out, games
+    return out, games, opp
 
 def lineup_card(away, home):
     """Pair starters slot by slot, canonical order."""
@@ -60,6 +65,15 @@ def lineup_card(away, home):
                 "a": pa, "h": ph,
                 "edge": round((pa["proj"] if pa else 0) - (ph["proj"] if ph else 0), 1),
             })
+    return rows
+
+def with_opponents(rows, opp):
+    """Stamp each starter with the NFL team it faces this week."""
+    for row in rows:
+        for side in ("a", "h"):
+            p = row.get(side)
+            if p:
+                p["opp"] = opp.get(p.get("pro"), "")
     return rows
 
 def window_split(side, tw):
@@ -89,7 +103,7 @@ def form_rows(power_path):
 
 def build(league_path, power_path, season, week):
     d = json.load(open(league_path))["data"]
-    tw, _ = nfl_windows(season, week)
+    tw, _, opp = nfl_windows(season, week)
     form = form_rows(power_path)
     out = []
     for m in d["matchups"]:
@@ -103,7 +117,7 @@ def build(league_path, power_path, season, week):
             "away_proj": a["projected"], "home_proj": h["projected"],
             "away_opt": a["optimal_proj"], "home_opt": h["optimal_proj"],
             "win_prob": a.get("win_prob"),
-            "lineup": lineup_card(a, h),
+            "lineup": with_opponents(lineup_card(a, h), opp),
             "windows": {"away": ea, "home": eh, "away_unk": ua, "home_unk": uh},
             "form": {"away": form.get(a["owner"]), "home": form.get(h["owner"])},
         })

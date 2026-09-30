@@ -120,7 +120,10 @@ def render_deep(A, E, m, slug):
         if not pl:
             return '<span class="dim">—</span>'
         flag = ' <i class="inj" title="%s">!</i>' % E(pl["injury"]) if pl["injury"] else ''
-        return '%s <span class="dim">%s</span>%s' % (E(pl["name"]), E(pl["pro"]), flag)
+        pro = E(pl["pro"])
+        if pl.get("opp"):
+            pro += ' <span class="opp">%s</span>' % E(pl["opp"])
+        return '%s <span class="dim">%s</span>%s' % (E(pl["name"]), pro, flag)
 
     A('<table class="lc"><thead><tr>')
     A('<th class="l">%s</th><th class="c">Proj</th><th class="c">Slot</th>'
