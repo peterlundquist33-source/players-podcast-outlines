@@ -3,7 +3,7 @@
 import json, sys, urllib.request, collections
 
 SLOT_ORDER = ["QB", "RB", "WR", "TE", "FLEX", "D/ST", "K"]
-WINDOWS = ["Thu", "Sun Noon", "Sun Aft", "SNF", "MNF"]
+WINDOWS = ["Thu", "Sun AM", "Sun Noon", "Sun Aft", "SNF", "MNF"]
 
 def nfl_windows(season, week):
     """{TEAM: window} using kickoff time."""
@@ -28,14 +28,14 @@ def nfl_windows(season, week):
             # UTC -> window
             if day == sorted(d["content"]["schedule"])[0]:
                 w = "Thu"
-            elif hh == 17:
-                w = "Sun Noon"
-            elif hh in (20, 21):
-                w = "Sun Aft"
             elif hh == 0 and day == sorted(d["content"]["schedule"])[-1]:
                 w = "MNF"
             elif hh == 0:
                 w = "SNF"
+            elif hh < 17:
+                w = "Sun AM"        # London/Europe morning kickoff
+            elif hh == 17:
+                w = "Sun Noon"
             else:
                 w = "Sun Aft"
             for t in teams:

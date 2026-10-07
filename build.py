@@ -11,7 +11,8 @@ OWNERS = {
     "The Basement Of KK": "Peter", "Runnin' Rezac": "Logan", "Pukachu": "John",
     "Amon that inhaler": "Grant", "PA Dive Your Way": "Kaleb",
     "Finding Nico": "Mitchell", "A Slap in the Face": "Isaac",
-    "Maye Be Cook'd": "Noah", "Maye, Quit Football": "Noah", "Taylor Gang": "CJ",
+    "Maye Be Cook'd": "Noah", "Maye, Quit Football": "Noah",
+    "Maye Have Downs": "Noah", "Taylor Gang": "CJ",
 }
 # Names the sheet still has under an old label.
 RENAMES = {"Achane Smokin CiGarretts": "Maye, Quit Football",
@@ -21,6 +22,38 @@ RENAMES = {"Achane Smokin CiGarretts": "Maye, Quit Football",
 # Peter's weekly picks, by owner.
 PICKS = {
     3: ["Logan", "CJ", "Grant", "Kaleb", "Christian", "Leif"],
+}
+
+# Last week's results, by the week the outline is for. The sheet has no cells for
+# this, and it has to survive a sheet rebuild, so it lives here like TEAM_OF_WEEK.
+#   lead     — one line the host opens on
+#   results  — (matchup, final, preview pick, verdict) rows, as played
+#   notes    — standings/trend bullets
+RECAP = {
+    5: {
+        "title": "Last Week — Week 4",
+        "lead": "The preview went 4–2 on picks. Both misses were blowouts the other way: "
+                "Kaleb over Grant, and Peter over Leif by 80.2.",
+        "results": [
+            ("CJ 114.6 — Noah 110.5",        "CJ by 4.1",        "CJ by 19",        "hit"),
+            ("Grant 104.4 — Kaleb 109.6",    "Kaleb by 5.2",     "Grant by 9",      "miss"),
+            ("Isaac 110.3 — John 135.7",     "John by 25.4",     "John by 11",      "hit"),
+            ("Mitchell 102.5 — Adam 146.8",  "Adam by 44.3",     "Adam by 21",      "hit"),
+            ("Leif 82.8 — Peter 163.0",      "Peter by 80.2",    "Leif by 16",      "miss"),
+            ("Christian 157.5 — Logan 112.9", "Christian by 44.6", "Christian by 21", "hit"),
+        ],
+        "notes": [
+            "Two unbeatens left: Adam 4–0 (610.7 PF, most in the league) and Peter 4–0 "
+            "(350.7 PA, fewest in the league). They play each other Sunday night.",
+            "Peter's 162.98 was the top score of the week; Leif's 82.82 was the lowest, and "
+            "all nine of Leif's starters finished under their projection.",
+            "Christian is 2nd on the power board at 1–3 — 538.6 PF is 2nd-most in the league "
+            "and his luck sits at −1.6. The schedule, not the roster.",
+            "Logan is 0–4 having been hit for 603.6 points against, the most any team has "
+            "allowed. Luck −1.7.",
+            "Noah is 0–4 at 89.9 ppg and an all-play record of 7–37. That one is the roster.",
+        ],
+    },
 }
 
 # Completed Team of the Week profiles. These preserve a finished profile when
@@ -139,7 +172,7 @@ def total(agenda):
 
 def render_deep(A, E, m, slug):
     """Lineup card + window split + season form for one matchup."""
-    W = ["Thu", "Sun Noon", "Sun Aft", "SNF", "MNF"]
+    W = ["Thu", "Sun AM", "Sun Noon", "Sun Aft", "SNF", "MNF"]
 
     fa, fh = m["form"]["away"], m["form"]["home"]
     if fa and fh:
@@ -148,6 +181,10 @@ def render_deep(A, E, m, slug):
             A('<div><b>#%d</b> %s · %s (%s) · %.1f ppg · all-play %s · luck %+.1f</div>'
               % (f["rank"], E(who), E(f["record"]), E(f["streak"]),
                  f["ppg"], E(f["allplay"]), f["luck"]))
+        wp = m.get("win_prob")
+        if wp is not None:
+            A('<div><b>Win prob</b> %s %.0f%% · %s %.0f%%</div>'
+              % (E(m["away_owner"]), wp * 100, E(m["home_owner"]), (1 - wp) * 100))
         A('</div>')
 
     def nm(pl):
@@ -232,6 +269,7 @@ def page(V, week, season, deep=()):
     impact = [(cell(V, r, "B"), cell(V, r, "C")) for r in range(35, 40)
               if cell(V, r, "C")]
     hotseat = [cell(V, r, "B") for r in range(15, 18) if cell(V, r, "B")]
+    recap = RECAP.get(int(week))
     totw_override = TEAM_OF_WEEK.get(int(week))
     if totw_override:
         totw_meta = totw_override["meta"]
@@ -254,6 +292,7 @@ def page(V, week, season, deep=()):
         pass
     A('<link rel="stylesheet" href="style.css%s"></head><body>' % cssv)
     nav = [("Agenda", "agenda")] if agenda else []
+    if recap:       nav.append((recap["title"], "recap"))
     for m in b:
         nav.append((f'{m["slot"].replace(" GAME","").title()} · {m["away"]} v {m["home"]}',
                     slug(m["away"] + "-" + m["home"])))
@@ -280,6 +319,24 @@ def page(V, week, season, deep=()):
             A(f'<li><span>{E(name)}</span><em>{E(t)}</em></li>')
         A('</ol>')
         A(f'<p class="total"><span>Total</span><em>{E(total(agenda))}</em></p>')
+        A('</section>')
+
+    if recap:
+        A(f'<section id="recap" class="card"><h2>{E(recap["title"])}</h2>')
+        if recap.get("lead"):
+            A(f'<p class="h2h">{E(recap["lead"])}</p>')
+        if recap.get("results"):
+            A('<table><thead><tr><th>Matchup</th><th>Final</th><th>Preview pick</th>'
+              '<th>Call</th></tr></thead><tbody>')
+            for game, final, pick, verdict in recap["results"]:
+                A(f'<tr><td>{E(game)}</td><td>{E(final)}</td><td>{E(pick)}</td>'
+                  f'<td>{"✓" if verdict == "hit" else "✗"}</td></tr>')
+            A('</tbody></table>')
+        if recap.get("notes"):
+            A('<h4>Where that leaves everyone</h4><ul class="over">')
+            for n in recap["notes"]:
+                A(f'<li>{E(n)}</li>')
+            A('</ul>')
         A('</section>')
 
     A('<h2 class="hdr">Matchups</h2>')
