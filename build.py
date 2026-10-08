@@ -62,66 +62,57 @@ RECAP = {
 BEACH_DRINKS = {
     5: {
         "title": "Beach Drink Draft",
-        "lead": "Twelve teams, twelve drinks, served in power-board order on a "
-                "Saint Lucia beach. Earn your pour.",
+        "lead": "Twelve teams, twelve drinks on a Saint Lucia beach, best to worst "
+                "in power-board order. Earn your pour.",
         "items": [
             (1, "Adam", "Uncut Cokerr",
-             "Chairman's Reserve 1931, neat, brought to your chair",
-             "4–0, 152.7 ppg, 610.7 PF and an all-play of 40–4. He has beaten "
-             "essentially every lineup in the league every week. Nobody asks what "
-             "he wants anymore; it just shows up."),
+             "Piña colada",
+             "4–0, 152.7 ppg, 610.7 PF, all-play 40–4 — the best drink on the beach "
+             "goes to the best team in the league."),
             (2, "Christian", "The Aura Farm",
-             "A flawless piña colada handed to the guy in the next chair over",
-             "134.7 ppg and 538.6 PF, both 2nd in the league, all-play 29–15 — "
-             "and a 1–3 record with luck −1.6. The drink is perfect. The schedule "
-             "keeps giving it away."),
+             "Frozen strawberry daiquiri",
+             "134.7 ppg and 538.6 PF, both 2nd, all-play 29–15, and still 1–3 with "
+             "luck −1.6 — excellent, just not the one everyone orders."),
             (3, "John", "Pukachu",
-             "Ice-cold Piton, straight from the cooler",
-             "2–2, 124.6 ppg, all-play 26–18, power #3. Not a thing on the menu is "
-             "more reliable and nobody writes home about it. Coming off a 25.4-point "
-             "win over Isaac."),
+             "Ice-cold Piton",
+             "2–2, 124.6 ppg, all-play 26–18, power #3 — cold, local, and reliable "
+             "every single week."),
             (4, "Peter", "The Basement Of KK",
-             "Rum punch the bartender over-poured and hasn't noticed",
-             "4–0 on 125.3 ppg — fine, not #1 fine — while allowing 350.7 points, "
-             "fewest in the league, with luck +1.5. Undefeated and tilting the glass "
-             "away so nobody looks in it."),
+             "Rum punch",
+             "4–0 on 125.3 ppg while allowing 350.7 points, fewest in the league, "
+             "with luck +1.5 — goes down easier than it should."),
             (5, "CJ", "Taylor Gang",
-             "Frozen strawberry daiquiri, no notes, no questions",
-             "3–1, 116.3 ppg, all-play 24–20, power #5. Nobody's drink of the trip, "
-             "nobody sends it back either. Beat Noah by 4.1 in Week 4, which is about "
-             "how much rum is in it."),
+             "Mojito",
+             "3–1, 116.3 ppg, all-play 24–20, power #5 — solid order nobody sends "
+             "back."),
             (6, "Kaleb", "PA Dive Your Way",
-             "The 2-for-1 happy hour special",
-             "3–1 and riding W2 on an all-play of 21–23 — he has lost more weekly "
-             "head-to-heads than he's won. Great value. Do not watch the pour."),
+             "Rum and Coke from the happy hour menu",
+             "3–1 and riding W2 on an all-play of 21–23 — great value, cheap "
+             "ingredients."),
             (7, "Leif", "Joey Lunchbox",
-             "A coconut you hack open yourself",
-             "123.5 ppg, 494.0 PF — a real drink in there most weeks. Then Week 4 "
-             "came back dry: 82.8, the week's low, with all nine starters under "
-             "projection. L2."),
+             "Fresh coconut water",
+             "123.5 ppg and 494.0 PF most weeks, then an 82.8 in Week 4, the week's "
+             "low, and L2 — healthy, not satisfying."),
             (8, "Mitchell", "Finding Nico",
-             "Mango daiquiri from the beach cart, 90% ice, gone in four minutes",
-             "112.3 ppg is middle of the pack, but 502.1 points allowed and a 44.3-point "
-             "loss to Adam leave him 1–3. Looks like a drink from six feet away."),
+             "Iced tea from the buffet dispenser",
+             "112.3 ppg is middle of the pack, but 502.1 points allowed and a "
+             "44.3-point loss to Adam leave him 1–3 — watery and free."),
             (9, "Isaac", "A Slap in the Face",
-             "The free welcome cocktail from the plastic gun at check-in",
-             "2–2 on 102.7 ppg and an all-play of 13–31 — only Noah has beaten fewer "
-             "lineups. The record is hospitality, not quality."),
+             "Flat Sprite",
+             "2–2 on 102.7 ppg with an all-play of 13–31 — technically a drink, "
+             "no fizz left in it."),
             (10, "Grant", "Amon that inhaler",
-             "Piton you set in the sand 40 minutes ago",
-             "2–2, 105.1 ppg, power #10, and his headline number is 389.0 points "
-             "against, 2nd-fewest in the league. The schedule has been kind and he is "
-             "still .500. Nobody is coming back for the second one."),
+             "Warm beer",
+             "2–2 on 105.1 ppg, power #10, propped up by 389.0 points against, "
+             "2nd-fewest — nobody wants the second one."),
             (11, "Logan", "Runnin' Rezac",
-             "An empty cup, a lime wedge, and a seagull",
-             "0–4 with 603.6 points against, the most any team has allowed, luck −1.7. "
-             "As of Wednesday the Week 5 lineup still had three empty starter slots, "
-             "so this one isn't entirely the beach's fault."),
+             "Hot black coffee",
+             "0–4 with 603.6 points against, the most any team has allowed, and "
+             "luck −1.7 — wrong drink, wrong beach, wrong temperature."),
             (12, "Noah", "Maye Have Downs",
-             "Pineapple left in the sun since Tuesday, filled with seawater",
-             "0–4, 89.9 ppg and 359.5 PF, both last, all-play 7–37, power #12 — and "
-             "projected favorite in four of five weeks. Hand-crafted. Locally sourced. "
-             "Nobody is finishing it."),
+             "Warm milk",
+             "0–4, 89.9 ppg and 359.5 PF, both last, all-play 7–37, power #12 — "
+             "the only thing on this list nobody would finish."),
         ],
     },
 }
