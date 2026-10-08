@@ -78,7 +78,8 @@ TRADES = {
              "actually drops to 117.4 because he gave up Warren's 14.5 and "
              "refilled the flex with Terry McLaurin at 13.2."),
             ("Trade 2", "CJ ↔ Grant",
-             [("CJ", "Juwan Johnson")],
+             [("CJ", "Juwan Johnson"),
+              ("Grant", "Quinshon Judkins")],
              [("CJ", "C+"), ("Grant", "B−")],
              "The quiet one. Grant turns a tight end he was starting into "
              "Quinshon Judkins, a genuine starting back — but it blows a hole in "
@@ -231,6 +232,48 @@ TEAM_OF_WEEK = {
                 "DK Metcalf to Logan for Saquon Barkley and J.K. Dobbins.",
     },
 }
+
+def check_trades(week):
+    """Cross-check the editorial deal cards against apply_trades.py's ledger.
+
+    The ledger is the source of truth for who received what; TRADES above only
+    carries the host's read. They are written by hand in two places, so a deal
+    card can silently end up listing one side of a swap — which is exactly what
+    happened to Trade 2 (Grant's Quinshon Judkins was missing). This makes that
+    a build failure instead of something a reader has to catch.
+    """
+    trades = TRADES.get(int(week))
+    if not trades:
+        return []
+    try:
+        from apply_trades import TRADES as LEDGER
+    except Exception as e:                      # ledger not importable; skip
+        return [f"could not import apply_trades ledger: {e}"]
+    ledger = LEDGER.get(int(week))
+    if not ledger:
+        return [f"no trade ledger for week {week} to check against"]
+    if len(ledger) != len(trades["deals"]):
+        return [f'{len(trades["deals"])} deal cards vs {len(ledger)} ledger deals']
+
+    problems = []
+    for deal, (label, who, gets, _grades, _take) in zip(ledger, trades["deals"]):
+        shown = {}
+        for owner, players in gets:
+            if owner in shown:
+                problems.append(f"{label}: {owner} listed twice in the gets list")
+            shown[owner] = [p.strip() for p in players.split(",") if p.strip()]
+        truth = {deal["a"]: deal["a_gets"], deal["b"]: deal["b_gets"]}
+        for owner, names in truth.items():
+            if owner not in shown:
+                problems.append(f'{label}: missing "{owner} gets {", ".join(names)}"')
+            elif shown[owner] != names:
+                problems.append(f'{label}: {owner} gets {shown[owner]} '
+                                f'but ledger says {names}')
+        for owner in shown:
+            if owner not in truth:
+                problems.append(f"{label}: {owner} is not part of this deal")
+    return problems
+
 
 def load(path):
     return (json.load(open(path)).get("values") or [])
@@ -617,6 +660,11 @@ def page(V, week, season, deep=()):
 if __name__ == "__main__":
     src, week, season, out = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
     deep = load_deep(sys.argv[5]) if len(sys.argv) > 5 else []
+    bad = check_trades(week)
+    if bad:
+        for p in bad:
+            print("  TRADE COPY:", p)
+        raise SystemExit("deal cards disagree with the trade ledger; refusing to write")
     V = load(src)
     pathlib.Path(out).write_text(page(V, week, season, deep))
     print("wrote", out)
