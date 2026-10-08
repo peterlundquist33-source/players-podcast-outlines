@@ -123,3 +123,14 @@ table.wt td.zero{color:#40507080}
 table.lc .opp{color:#7f92b3;font-weight:400;white-space:nowrap}
 table.wt td .pct{display:block;font-size:10px;font-weight:400;color:var(--dim);margin-top:2px;letter-spacing:.4px}
 table.wt td.hot .pct{color:var(--gold)}
+/* trades */
+.deal{background:#0a1730;border:1px solid var(--line);border-radius:9px;
+padding:12px 14px;margin:12px 0}
+.deal h4{margin:0 0 8px;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
+.deal p{margin:8px 0 0;font-size:14px;color:#cfdcf2}
+.gets{margin:0;padding-left:18px}
+.gets li{margin:4px 0;font-size:14px}
+.gets b{color:var(--gold2);font-weight:600;margin-right:4px}
+.grade{display:inline-block;background:var(--navy2);border:1px solid var(--gold);
+border-radius:20px;padding:1px 9px;font-size:11px;letter-spacing:1px;
+font-weight:700;color:var(--gold);text-transform:none}

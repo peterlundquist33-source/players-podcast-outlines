@@ -117,6 +117,8 @@ def build(league_path, power_path, season, week):
             "away_proj": a["projected"], "home_proj": h["projected"],
             "away_opt": a["optimal_proj"], "home_opt": h["optimal_proj"],
             "win_prob": a.get("win_prob"),
+            # set by apply_trades.py when ESPN's win chance predates a trade
+            "wp_stale": bool(a.get("wp_stale") or h.get("wp_stale")),
             "lineup": with_opponents(lineup_card(a, h), opp),
             "windows": {"away": ea, "home": eh, "away_unk": ua, "home_unk": uh},
             "form": {"away": form.get(a["owner"]), "home": form.get(h["owner"])},

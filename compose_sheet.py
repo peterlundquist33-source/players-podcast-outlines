@@ -28,7 +28,9 @@ AGENDA = [
     ("Welcome Back", ""),
     ("Last Week: Predictions vs. Results", ""),
     ("Weekly Awards + Analytics", ""),
-    ("Trades + Waiver Moves", "[ needs ESPN transactions — not wired up ]"),
+    # Week 5's three verified trades are rendered from build.py's TRADES, which
+    # inserts its own agenda row, so this no longer carries a placeholder.
+    ("Trades + Waiver Moves", ""),
     ("Hot Seat", ""),
     ("Team of the Week", "[ pick TBD — workbook unreachable ]"),
     ("Matchups", ""),
@@ -73,8 +75,10 @@ HOT_SEAT = [
     "104.9 (57%) — that is four of five weeks as the projected favorite, at 0-4. "
     "No excuses left in that one.",
     "Runnin' Rezac — Logan · 0-4 with 603.6 points against, the most any team has "
-    "allowed, luck -1.7, power #11. As of Wednesday morning his Week 5 lineup still has "
-    "three empty starter slots, which is the only reason the card reads 69.6.",
+    "allowed, luck -1.7, power #11. He moved four players in Thursday's two trades and "
+    "the post-trade card still reads 75.0, because three starter slots are empty. "
+    "Burrow for Hurts at quarterback is the only clear gain, and he sold DK Metcalf "
+    "four hours after acquiring him.",
     "Finding Nico — Mitchell · 1-3, 112.3 ppg, power #8, coming off a 44.3-point loss to "
     "Adam. Projected 80% to beat Logan. Lose this one and the playoff story gets hard "
     "to tell.",

@@ -56,6 +56,83 @@ RECAP = {
     },
 }
 
+# Trade segment, by week. The roster effects are derived in apply_trades.py;
+# only the editorial read lives here, like RECAP, so a sheet rebuild keeps it.
+#   deals    — (label, owners, [(owner, gets)], [(owner, grade)], take)
+#   day      — full-day grades, (owner, grade, line)
+#   spotlight/caveats — host talking points
+TRADES = {
+    5: {
+        "title": "Trade Deadline Frenzy",
+        "lead": "Three deals on Thursday, eleven players moved, and four rosters "
+                "that do not look like they did on Wednesday. CJ made two of the "
+                "three and won the day.",
+        "deals": [
+            ("Trade 1", "Isaac ↔ Logan",
+             [("Isaac", "Saquon Barkley, J.K. Dobbins"),
+              ("Logan", "DK Metcalf, Jaylen Warren")],
+             [("Isaac", "A−"), ("Logan", "C")],
+             "Isaac buys the best asset in any of the three deals. Barkley is "
+             "projected 0.0 and listed questionable right now, so this is a bet "
+             "on the back half of the season, not on Sunday — Isaac's card "
+             "actually drops to 117.4 because he gave up Warren's 14.5 and "
+             "refilled the flex with Terry McLaurin at 13.2."),
+            ("Trade 2", "CJ ↔ Grant",
+             [("CJ", "Juwan Johnson")],
+             [("CJ", "C+"), ("Grant", "B−")],
+             "The quiet one. Grant turns a tight end he was starting into "
+             "Quinshon Judkins, a genuine starting back — but it blows a hole in "
+             "his lineup: Dallas Goedert is doubtful at 0.0, so Grant has no "
+             "startable tight end and his projection falls to 106.2 with only "
+             "eight starters on the card."),
+            ("Trade 3", "CJ ↔ Logan",
+             [("CJ", "Emanuel Wilson, DK Metcalf, Jalen Hurts"),
+              ("Logan", "Zach Charbonnet, Joe Burrow")],
+             [("CJ", "A"), ("Logan", "D")],
+             "Three-for-two in CJ's favour and the deal of the day. CJ lands "
+             "Hurts and DK; Logan's side is a quarterback swap plus Charbonnet, "
+             "who is OUT at 0.0. Logan is 0–4 and just traded the DK he had "
+             "owned since lunchtime."),
+        ],
+        "day": [
+            ("CJ", "A+", "Best day in the league. Two deals, and he finished with "
+                         "DK Metcalf, Jalen Hurts, Emanuel Wilson and Juwan "
+                         "Johnson for Judkins, Charbonnet and Burrow. Worth saying "
+                         "out loud: it costs him this week. His Week 5 card drops "
+                         "114.7 to 107.0, because the new pieces are on the bench "
+                         "and Tyler Shough at 16.5 is still his best startable "
+                         "quarterback. The grade is for the asset haul, not Sunday."),
+            ("Isaac", "A−", "Best single asset. Saquon Barkley is the most "
+                            "valuable player who changed hands all day."),
+            ("Grant", "B−", "Judkins is a real upgrade. The tight end slot is now "
+                            "a hole he has to solve."),
+            ("Logan", "D−", "Moved four players, got worse at the position he was "
+                            "already losing with, and sold the one asset that "
+                            "appreciated inside four hours."),
+        ],
+        "spotlight": [
+            "Logan owned DK Metcalf for under four hours. He acquired him from "
+            "Isaac in Trade 1 and shipped him to CJ in Trade 3 the same "
+            "afternoon — the whole arc inside one Thursday.",
+            "Both DK valuations cannot be right. In Trade 1 he is a headline "
+            "piece coming back for Barkley and Dobbins; in Trade 3 he is a "
+            "throw-in on CJ's side of a three-for-two. One of those two prices "
+            "is wrong, and Logan set both of them.",
+        ],
+        "caveats": [
+            "Saquon Barkley's status is unresolved — questionable, projected 0.0. "
+            "Isaac's A− assumes he plays and holds value; if he is out long-term "
+            "that grade comes down.",
+            "Grant's B− improves if Dallas Goedert returns soon. Right now "
+            "Goedert is doubtful at 0.0 and Grant has no other startable tight "
+            "end, which is the entire reason his card reads eight starters.",
+            "CJ's three-for-two leaves him carrying 18 players. A corresponding "
+            "drop or IR move is still owed; Alec Pierce has been moved to the "
+            "IR slot Charbonnet vacated.",
+        ],
+    },
+}
+
 # Beach-drink segment, by week. Every owner exactly once, ordered by power rank.
 # The sheet has no cells for this, so it lives here to survive a sheet rebuild.
 #   items — (power rank, owner, team, drink, note)
@@ -82,9 +159,10 @@ BEACH_DRINKS = {
              "4–0 on 125.3 ppg while allowing 350.7 points, fewest in the league, "
              "with luck +1.5 — goes down easier than it should."),
             (5, "CJ", "Taylor Gang",
-             "Mojito",
-             "3–1, 116.3 ppg, all-play 24–20, power #5 — solid order nobody sends "
-             "back."),
+             "Dark and stormy",
+             "3–1, 116.3 ppg, all-play 24–20, power #5 — and he won Thursday "
+             "outright, adding Hurts, DK and Juwan Johnson. Best drink outside "
+             "the top four and climbing."),
             (6, "Kaleb", "PA Dive Your Way",
              "Rum and Coke from the happy hour menu",
              "3–1 and riding W2 on an all-play of 21–23 — great value, cheap "
@@ -99,16 +177,16 @@ BEACH_DRINKS = {
              "44.3-point loss to Adam leave him 1–3 — watery and free."),
             (9, "Isaac", "A Slap in the Face",
              "Flat Sprite",
-             "2–2 on 102.7 ppg with an all-play of 13–31 — technically a drink, "
-             "no fizz left in it."),
+             "2–2 on 102.7 ppg with an all-play of 13–31, and he bought Barkley at "
+             "0.0 projected — no fizz now, might come back carbonated."),
             (10, "Grant", "Amon that inhaler",
              "Warm beer",
              "2–2 on 105.1 ppg, power #10, propped up by 389.0 points against, "
-             "2nd-fewest — nobody wants the second one."),
+             "2nd-fewest — and he traded away the only tight end he could start."),
             (11, "Logan", "Runnin' Rezac",
              "Hot black coffee",
-             "0–4 with 603.6 points against, the most any team has allowed, and "
-             "luck −1.7 — wrong drink, wrong beach, wrong temperature."),
+             "0–4 with 603.6 points against, the most any team has allowed, luck "
+             "−1.7 — then traded four players and still has three empty slots."),
             (12, "Noah", "Maye Have Downs",
              "Warm milk",
              "0–4, 89.9 ppg and 359.5 PF, both last, all-play 7–37, power #12 — "
@@ -144,9 +222,13 @@ TEAM_OF_WEEK = {
             "Ja'Marr Chase — 54.5 through three weeks, WR #8; coming off 24.8 in Week 3",
             "Javonte Williams — 50.5 through three weeks, RB #11; 18.3 in Week 3",
             "Dalton Kincaid — 44.3 through three weeks, TE #5 as a 12th-round pick",
-            "Jaylen Warren — 40.6 through three weeks, RB #17 as a 7th-round pick",
+            "Jaylen Warren — 40.6 through three weeks, RB #17 as a 7th-round pick; "
+            "since traded to Logan in Thursday's deal for Saquon Barkley",
             "Cam Skattebo — 36.6 through three weeks, RB #20 as a 5th-round pick",
         ],
+        # This is the Week 4 roster as it stood when the profile was written.
+        "asof": "Roster as of Week 4. Isaac has since traded Jaylen Warren and "
+                "DK Metcalf to Logan for Saquon Barkley and J.K. Dobbins.",
     },
 }
 
@@ -246,6 +328,15 @@ def render_deep(A, E, m, slug):
         if wp is not None:
             A('<div><b>Win prob</b> %s %.0f%% · %s %.0f%%</div>'
               % (E(m["away_owner"]), wp * 100, E(m["home_owner"]), (1 - wp) * 100))
+        elif m.get("wp_stale"):
+            # ESPN's win chance was computed before the trades; the projected
+            # edge is the honest post-trade comparison we can actually derive.
+            d = m["away_proj"] - m["home_proj"]
+            lead = m["away_owner"] if d >= 0 else m["home_owner"]
+            A('<div><b>Projected edge</b> %s by %.1f '
+              '<span class="dim">— post-trade lineups; ESPN win %% retired, '
+              'it predates the Oct 8 trades</span></div>'
+              % (E(lead), abs(d)))
         A('</div>')
 
     def nm(pl):
@@ -331,14 +422,29 @@ def page(V, week, season, deep=()):
               if cell(V, r, "C")]
     hotseat = [cell(V, r, "B") for r in range(15, 18) if cell(V, r, "B")]
     recap = RECAP.get(int(week))
+    trades = TRADES.get(int(week))
     drinks = BEACH_DRINKS.get(int(week))
+    if trades:
+        # Verified trades are in hand, so the sheet's "Trades + Waiver Moves"
+        # row no longer needs its not-wired-up placeholder: point it at the
+        # real segment instead.
+        agenda = [(name, t) for name, t in agenda
+                  if "trade" not in name.lower()]
+        for i, (name, t) in enumerate(agenda):
+            if "predictions" in name.lower() or "last week" in name.lower():
+                agenda.insert(i + 1, (trades["title"], ""))
+                break
+        else:
+            agenda.append((trades["title"], ""))
     if drinks and agenda:
         agenda.append((drinks["title"] + " — all 12 teams", ""))
     totw_override = TEAM_OF_WEEK.get(int(week))
+    totw_asof = ""
     if totw_override:
         totw_meta = totw_override["meta"]
         totw_roster = totw_override["roster"]
         impact = [("", text) for text in totw_override["impact"]]
+        totw_asof = totw_override.get("asof", "")
 
     P = []
     A = P.append
@@ -357,6 +463,7 @@ def page(V, week, season, deep=()):
     A('<link rel="stylesheet" href="style.css%s"></head><body>' % cssv)
     nav = [("Agenda", "agenda")] if agenda else []
     if recap:       nav.append((recap["title"], "recap"))
+    if trades:      nav.append((trades["title"], "trades"))
     for m in b:
         nav.append((f'{m["slot"].replace(" GAME","").title()} · {m["away"]} v {m["home"]}',
                     slug(m["away"] + "-" + m["home"])))
@@ -404,6 +511,40 @@ def page(V, week, season, deep=()):
             A('</ul>')
         A('</section>')
 
+    if trades:
+        A(f'<section id="trades" class="card"><h2>{E(trades["title"])}</h2>')
+        if trades.get("lead"):
+            A(f'<p class="h2h">{E(trades["lead"])}</p>')
+        for label, who, gets, grades, take in trades["deals"]:
+            A('<div class="deal">')
+            A(f'<h4>{E(label)} <span class="dim">{E(who)}</span>'
+              + "".join(f'<span class="grade">{E(ow)} {E(g)}</span>'
+                        for ow, g in grades)
+              + '</h4>')
+            A('<ul class="gets">')
+            for ow, players in gets:
+                A(f'<li><b>{E(ow)} gets</b> {E(players)}</li>')
+            A('</ul>')
+            A(f'<p>{E(take)}</p>')
+            A('</div>')
+        if trades.get("day"):
+            A('<h4>Grading the whole day</h4><dl class="awards">')
+            for ow, g, line in trades["day"]:
+                A(f'<dt>{E(ow)} <span class="grade">{E(g)}</span></dt>'
+                  f'<dd>{E(line)}</dd>')
+            A('</dl>')
+        if trades.get("spotlight"):
+            A('<h4>Spotlight</h4><ul class="over">')
+            for s in trades["spotlight"]:
+                A(f'<li>{E(s)}</li>')
+            A('</ul>')
+        if trades.get("caveats"):
+            A('<h4>Caveats</h4><ul class="over">')
+            for c in trades["caveats"]:
+                A(f'<li>{E(c)}</li>')
+            A('</ul>')
+        A('</section>')
+
     A('<h2 class="hdr">Matchups</h2>')
     for m in b:
         A(f'<section id="{slug(m["away"] + "-" + m["home"])}" class="card game">')
@@ -441,6 +582,8 @@ def page(V, week, season, deep=()):
             for k, v in totw_meta:
                 A(f'<dt>{E(k)}</dt><dd>{E(v)}</dd>')
             A('</dl>')
+        if totw_asof:
+            A(f'<p class="h2h"><b>As of</b> {E(totw_asof)}</p>')
         A('<table><thead><tr><th>Pos</th><th>Player</th><th>Rd</th><th>Rank</th></tr></thead><tbody>')
         for pos, nm, rd, rk in totw_roster:
             A(f'<tr><td>{E(pos)}</td><td>{E(nm)}</td><td>{E(rd)}</td><td>{E(rk)}</td></tr>')
