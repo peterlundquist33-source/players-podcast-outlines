@@ -56,6 +56,76 @@ RECAP = {
     },
 }
 
+# Beach-drink segment, by week. Every owner exactly once, ordered by power rank.
+# The sheet has no cells for this, so it lives here to survive a sheet rebuild.
+#   items — (power rank, owner, team, drink, note)
+BEACH_DRINKS = {
+    5: {
+        "title": "Beach Drink Draft",
+        "lead": "Twelve teams, twelve drinks, served in power-board order on a "
+                "Saint Lucia beach. Earn your pour.",
+        "items": [
+            (1, "Adam", "Uncut Cokerr",
+             "Chairman's Reserve 1931, neat, brought to your chair",
+             "4–0, 152.7 ppg, 610.7 PF and an all-play of 40–4. He has beaten "
+             "essentially every lineup in the league every week. Nobody asks what "
+             "he wants anymore; it just shows up."),
+            (2, "Christian", "The Aura Farm",
+             "A flawless piña colada handed to the guy in the next chair over",
+             "134.7 ppg and 538.6 PF, both 2nd in the league, all-play 29–15 — "
+             "and a 1–3 record with luck −1.6. The drink is perfect. The schedule "
+             "keeps giving it away."),
+            (3, "John", "Pukachu",
+             "Ice-cold Piton, straight from the cooler",
+             "2–2, 124.6 ppg, all-play 26–18, power #3. Not a thing on the menu is "
+             "more reliable and nobody writes home about it. Coming off a 25.4-point "
+             "win over Isaac."),
+            (4, "Peter", "The Basement Of KK",
+             "Rum punch the bartender over-poured and hasn't noticed",
+             "4–0 on 125.3 ppg — fine, not #1 fine — while allowing 350.7 points, "
+             "fewest in the league, with luck +1.5. Undefeated and tilting the glass "
+             "away so nobody looks in it."),
+            (5, "CJ", "Taylor Gang",
+             "Frozen strawberry daiquiri, no notes, no questions",
+             "3–1, 116.3 ppg, all-play 24–20, power #5. Nobody's drink of the trip, "
+             "nobody sends it back either. Beat Noah by 4.1 in Week 4, which is about "
+             "how much rum is in it."),
+            (6, "Kaleb", "PA Dive Your Way",
+             "The 2-for-1 happy hour special",
+             "3–1 and riding W2 on an all-play of 21–23 — he has lost more weekly "
+             "head-to-heads than he's won. Great value. Do not watch the pour."),
+            (7, "Leif", "Joey Lunchbox",
+             "A coconut you hack open yourself",
+             "123.5 ppg, 494.0 PF — a real drink in there most weeks. Then Week 4 "
+             "came back dry: 82.8, the week's low, with all nine starters under "
+             "projection. L2."),
+            (8, "Mitchell", "Finding Nico",
+             "Mango daiquiri from the beach cart, 90% ice, gone in four minutes",
+             "112.3 ppg is middle of the pack, but 502.1 points allowed and a 44.3-point "
+             "loss to Adam leave him 1–3. Looks like a drink from six feet away."),
+            (9, "Isaac", "A Slap in the Face",
+             "The free welcome cocktail from the plastic gun at check-in",
+             "2–2 on 102.7 ppg and an all-play of 13–31 — only Noah has beaten fewer "
+             "lineups. The record is hospitality, not quality."),
+            (10, "Grant", "Amon that inhaler",
+             "Piton you set in the sand 40 minutes ago",
+             "2–2, 105.1 ppg, power #10, and his headline number is 389.0 points "
+             "against, 2nd-fewest in the league. The schedule has been kind and he is "
+             "still .500. Nobody is coming back for the second one."),
+            (11, "Logan", "Runnin' Rezac",
+             "An empty cup, a lime wedge, and a seagull",
+             "0–4 with 603.6 points against, the most any team has allowed, luck −1.7. "
+             "As of Wednesday the Week 5 lineup still had three empty starter slots, "
+             "so this one isn't entirely the beach's fault."),
+            (12, "Noah", "Maye Have Downs",
+             "Pineapple left in the sun since Tuesday, filled with seawater",
+             "0–4, 89.9 ppg and 359.5 PF, both last, all-play 7–37, power #12 — and "
+             "projected favorite in four of five weeks. Hand-crafted. Locally sourced. "
+             "Nobody is finishing it."),
+        ],
+    },
+}
+
 # Completed Team of the Week profiles. These preserve a finished profile when
 # the source sheet is later rebuilt from its weekly template.
 TEAM_OF_WEEK = {
@@ -270,6 +340,9 @@ def page(V, week, season, deep=()):
               if cell(V, r, "C")]
     hotseat = [cell(V, r, "B") for r in range(15, 18) if cell(V, r, "B")]
     recap = RECAP.get(int(week))
+    drinks = BEACH_DRINKS.get(int(week))
+    if drinks and agenda:
+        agenda.append((drinks["title"] + " — all 12 teams", ""))
     totw_override = TEAM_OF_WEEK.get(int(week))
     if totw_override:
         totw_meta = totw_override["meta"]
@@ -299,6 +372,7 @@ def page(V, week, season, deep=()):
     if awards:      nav.append(("Weekly Awards", "awards"))
     if totw_roster: nav.append(("Team of the Week", "totw"))
     if hotseat:     nav.append(("Hot Seat", "hotseat"))
+    if drinks:      nav.append((drinks["title"], "drinks"))
 
     A('<div class="bar"><a class="back" href="index.html">← Weeks</a>')
     A('<details class="menu"><summary>Jump to<span class="car">▾</span></summary><nav>')
@@ -392,6 +466,16 @@ def page(V, week, season, deep=()):
         for h in hotseat:
             A(f'<li>{E(h)}</li>')
         A('</ul></section>')
+
+    if drinks:
+        A(f'<section id="drinks" class="card"><h2>{E(drinks["title"])}</h2>')
+        if drinks.get("lead"):
+            A(f'<p class="h2h">{E(drinks["lead"])}</p>')
+        A('<dl class="drinks">')
+        for rank, owner, team, drink, note in drinks["items"]:
+            A(f'<dt><span class="rk">#{rank}</span>{E(drink)}</dt>'
+              f'<dd>{E(note)}<span class="who">{E(team)} · {E(owner)}</span></dd>')
+        A('</dl></section>')
 
     A('</main><footer>Players FF Podcast · outline</footer></body></html>')
     return "\n".join(P)

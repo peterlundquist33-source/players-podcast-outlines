@@ -42,3 +42,5 @@ as a bracketed placeholder rather than guessed.
 `OWNERS` maps team name -> owner, so team renames don't break picks.
 `RENAMES` corrects team names the sheet still has under an old label.
 `RECAP` holds last week's results table; the sheet has no cells for it.
+`BEACH_DRINKS` holds the beach-drink segment (one entry per owner, in power-board
+order); like `RECAP` it lives in `build.py` so it survives a sheet rebuild.
