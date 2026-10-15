@@ -5,6 +5,44 @@ import json, html, re, sys, pathlib
 ORDER = ["THURSDAY NIGHT GAME", "SUNDAY NOON GAME", "SUNDAY AFTERNOON GAME",
          "SUNDAY NIGHT GAME", "MONDAY NIGHT GAME"]
 
+# The sheet's agenda column *is* the show rundown, so it also decides the order
+# the body sections run in: recap and awards look back at the week that just
+# finished, trades and the hot seat cover what happened between weeks, and the
+# matchup previews — the part that looks forward — come near the end, where the
+# host actually reaches them. Each key lists the substrings an agenda row may
+# use for it; first match wins, so keep the more specific patterns earlier.
+RUNDOWN = [
+    ("recap",    ("last week", "predictions vs")),
+    ("awards",   ("award",)),
+    ("trades",   ("trade",)),
+    ("hotseat",  ("hot seat",)),
+    ("totw",     ("team of the week",)),
+    ("matchups", ("matchup",)),
+    ("drinks",   ("drink",)),
+]
+# Fallback for a segment with no agenda row of its own (and for a week with no
+# agenda at all): the house rundown, in the same order.
+SECTION_ORDER = [key for key, _ in RUNDOWN]
+
+
+def section_for(name):
+    """Section key an agenda row introduces, or None if it opens no section."""
+    low = name.lower()
+    for key, keys in RUNDOWN:
+        if any(k in low for k in keys):
+            return key
+    return None
+
+
+def running_order(agenda):
+    """Section keys in the order the agenda runs them, then anything left."""
+    seen = []
+    for name, _ in agenda:
+        key = section_for(name)
+        if key and key not in seen:
+            seen.append(key)
+    return seen + [key for key in SECTION_ORDER if key not in seen]
+
 # Team name -> owner. Keeps picks working even when a team gets renamed.
 OWNERS = {
     "Uncut Cokerr": "Adam", "Joey Lunchbox": "Leif", "The Aura Farm": "Christian",
@@ -470,12 +508,11 @@ def page(V, week, season, deep=()):
     if trades:
         # Verified trades are in hand, so the sheet's "Trades + Waiver Moves"
         # row no longer needs its not-wired-up placeholder: point it at the
-        # real segment instead.
-        agenda = [(name, t) for name, t in agenda
-                  if "trade" not in name.lower()]
+        # real segment instead. Renamed in place, keeping its timing cell, so
+        # the sheet stays the one deciding where in the rundown it sits.
         for i, (name, t) in enumerate(agenda):
-            if "predictions" in name.lower() or "last week" in name.lower():
-                agenda.insert(i + 1, (trades["title"], ""))
+            if "trade" in name.lower():
+                agenda[i] = (trades["title"], t)
                 break
         else:
             agenda.append((trades["title"], ""))
@@ -504,16 +541,23 @@ def page(V, week, season, deep=()):
     except Exception:
         pass
     A('<link rel="stylesheet" href="style.css%s"></head><body>' % cssv)
+    order = running_order(agenda)
+
+    def nav_for(key):
+        if key == "recap":   return [(recap["title"], "recap")] if recap else []
+        if key == "trades":  return [(trades["title"], "trades")] if trades else []
+        if key == "awards":  return [("Weekly Awards", "awards")] if awards else []
+        if key == "totw":    return [("Team of the Week", "totw")] if totw_roster else []
+        if key == "hotseat": return [("Hot Seat", "hotseat")] if hotseat else []
+        if key == "drinks":  return [(drinks["title"], "drinks")] if drinks else []
+        if key == "matchups":
+            return [(f'{m["slot"].replace(" GAME","").title()} · {m["away"]} v {m["home"]}',
+                     slug(m["away"] + "-" + m["home"])) for m in b]
+        return []
+
     nav = [("Agenda", "agenda")] if agenda else []
-    if recap:       nav.append((recap["title"], "recap"))
-    if trades:      nav.append((trades["title"], "trades"))
-    for m in b:
-        nav.append((f'{m["slot"].replace(" GAME","").title()} · {m["away"]} v {m["home"]}',
-                    slug(m["away"] + "-" + m["home"])))
-    if awards:      nav.append(("Weekly Awards", "awards"))
-    if totw_roster: nav.append(("Team of the Week", "totw"))
-    if hotseat:     nav.append(("Hot Seat", "hotseat"))
-    if drinks:      nav.append((drinks["title"], "drinks"))
+    for key in order:
+        nav.extend(nav_for(key))
 
     A('<div class="bar"><a class="back" href="index.html">← Weeks</a>')
     A('<details class="menu"><summary>Jump to<span class="car">▾</span></summary><nav>')
@@ -536,7 +580,8 @@ def page(V, week, season, deep=()):
         A(f'<p class="total"><span>Total</span><em>{E(total(agenda))}</em></p>')
         A('</section>')
 
-    if recap:
+    def emit_recap():
+        if not recap: return
         A(f'<section id="recap" class="card"><h2>{E(recap["title"])}</h2>')
         if recap.get("lead"):
             A(f'<p class="h2h">{E(recap["lead"])}</p>')
@@ -554,7 +599,8 @@ def page(V, week, season, deep=()):
             A('</ul>')
         A('</section>')
 
-    if trades:
+    def emit_trades():
+        if not trades: return
         A(f'<section id="trades" class="card"><h2>{E(trades["title"])}</h2>')
         if trades.get("lead"):
             A(f'<p class="h2h">{E(trades["lead"])}</p>')
@@ -588,37 +634,40 @@ def page(V, week, season, deep=()):
             A('</ul>')
         A('</section>')
 
-    A('<h2 class="hdr">Matchups</h2>')
-    for m in b:
-        A(f'<section id="{slug(m["away"] + "-" + m["home"])}" class="card game">')
-        A(f'<div class="slot">{E(m["slot"].replace(" GAME",""))}</div>')
-        A(f'<h3>{E(m["away"])} <i>vs</i> {E(m["home"])}</h3>')
-        A('<div class="teams">')
-        for tname, players in m["rosters"]:
-            A(f'<div class="team"><h4>{E(tname)}</h4><ul>')
-            for p in players:
-                A(f'<li>{E(p)}</li>')
-            A('</ul></div>')
-        A('</div>')
-        dm = match_deep(m, deep)
-        if dm:
-            render_deep(A, E, dm, slug)
-        if m["h2h"]:
-            A(f'<p class="h2h"><b>All-time H2H</b> {E(m["h2h"])}</p>')
-        if m.get("pick_team"):
-            A(f'<p class="pick"><b>Pick</b> <span class="won">{E(m["pick_team"])}</span>'
-              f'<span class="ow">{E(m["pick_owner"])}</span></p>')
-        else:
-            A('<p class="pick"><b>Pick</b> <span class="blank">—</span></p>')
-        A('</section>')
+    def emit_matchups():
+        A('<h2 class="hdr">Matchups</h2>')
+        for m in b:
+            A(f'<section id="{slug(m["away"] + "-" + m["home"])}" class="card game">')
+            A(f'<div class="slot">{E(m["slot"].replace(" GAME",""))}</div>')
+            A(f'<h3>{E(m["away"])} <i>vs</i> {E(m["home"])}</h3>')
+            A('<div class="teams">')
+            for tname, players in m["rosters"]:
+                A(f'<div class="team"><h4>{E(tname)}</h4><ul>')
+                for p in players:
+                    A(f'<li>{E(p)}</li>')
+                A('</ul></div>')
+            A('</div>')
+            dm = match_deep(m, deep)
+            if dm:
+                render_deep(A, E, dm, slug)
+            if m["h2h"]:
+                A(f'<p class="h2h"><b>All-time H2H</b> {E(m["h2h"])}</p>')
+            if m.get("pick_team"):
+                A(f'<p class="pick"><b>Pick</b> <span class="won">{E(m["pick_team"])}</span>'
+                  f'<span class="ow">{E(m["pick_owner"])}</span></p>')
+            else:
+                A('<p class="pick"><b>Pick</b> <span class="blank">—</span></p>')
+            A('</section>')
 
-    if awards:
+    def emit_awards():
+        if not awards: return
         A('<section id="awards" class="card"><h2>Weekly Awards</h2><dl class="awards">')
         for label, body, who in awards:
             A(f'<dt>{E(label)}</dt><dd>{E(body)}<span class="who">{E(who)}</span></dd>')
         A('</dl></section>')
 
-    if totw_roster:
+    def emit_totw():
+        if not totw_roster: return
         A('<section id="totw" class="card"><h2>Team of the Week</h2>')
         if totw_meta:
             A('<dl class="kv">')
@@ -638,13 +687,15 @@ def page(V, week, season, deep=()):
             A('</ol>')
         A('</section>')
 
-    if hotseat:
+    def emit_hotseat():
+        if not hotseat: return
         A('<section id="hotseat" class="card"><h2>Hot Seat</h2><ul>')
         for h in hotseat:
             A(f'<li>{E(h)}</li>')
         A('</ul></section>')
 
-    if drinks:
+    def emit_drinks():
+        if not drinks: return
         A(f'<section id="drinks" class="card"><h2>{E(drinks["title"])}</h2>')
         if drinks.get("lead"):
             A(f'<p class="h2h">{E(drinks["lead"])}</p>')
@@ -654,8 +705,46 @@ def page(V, week, season, deep=()):
               f'<dd>{E(note)}<span class="who">{E(team)} · {E(owner)}</span></dd>')
         A('</dl></section>')
 
+    emit = {"recap": emit_recap, "awards": emit_awards, "trades": emit_trades,
+            "hotseat": emit_hotseat, "totw": emit_totw,
+            "matchups": emit_matchups, "drinks": emit_drinks}
+    for key in order:
+        emit[key]()
+
     A('</main><footer>Players FF Podcast · outline</footer></body></html>')
     return "\n".join(P)
+
+MARKER = {"matchups": '<h2 class="hdr">Matchups</h2>'}
+
+
+def check_order(doc):
+    """Section headings and jump-nav links must both follow the rundown.
+
+    The expected order is read back off the page's own rendered Agenda, so this
+    checks the finished HTML rather than trusting the values page() built from.
+    """
+    body = doc.split("<main>", 1)[1]
+    rows = re.findall(r"<li><span>(.*?)</span><em>", body.split("</ol>", 1)[0])
+    order = running_order([(html.unescape(r), "") for r in rows])
+    seen = [(body.index(m), key) for key in order
+            for m in [MARKER.get(key, f'id="{key}"')] if m in body]
+    bad = []
+    if seen != sorted(seen):
+        bad.append("body section order is %s, rundown says %s"
+                   % ([k for _, k in sorted(seen)], [k for _, k in seen]))
+    # Every jump-nav target must exist, and in the same order it is linked.
+    nav = re.findall(r'<a href="#([\w-]+)">', doc.split("</nav>", 1)[0])
+    at = []
+    for sid in nav:
+        if f'id="{sid}"' not in doc:
+            bad.append(f"jump-nav link #{sid} has no section")
+        elif sid != "agenda":
+            at.append((body.index(f'id="{sid}"'), sid))
+    if at != sorted(at):
+        bad.append("jump-nav order disagrees with the page: " +
+                   ", ".join(s for _, s in at))
+    return bad
+
 
 if __name__ == "__main__":
     src, week, season, out = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
@@ -666,5 +755,11 @@ if __name__ == "__main__":
             print("  TRADE COPY:", p)
         raise SystemExit("deal cards disagree with the trade ledger; refusing to write")
     V = load(src)
-    pathlib.Path(out).write_text(page(V, week, season, deep))
+    doc = page(V, week, season, deep)
+    bad = check_order(doc)
+    if bad:
+        for p in bad:
+            print("  ORDER:", p)
+        raise SystemExit("page does not follow the agenda's rundown; refusing to write")
+    pathlib.Path(out).write_text(doc)
     print("wrote", out)

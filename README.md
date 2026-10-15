@@ -46,6 +46,31 @@ Week 5 was built this way. Anything the league data can't supply (guest,
 recording date, intro song, Team of the Week pick, Peter's picks) is written
 as a bracketed placeholder rather than guessed.
 
+## Section order
+
+The sheet's agenda column (`E4:E13`) is the show rundown, and it also decides
+what order the body sections run in, so a week inherits its order from its own
+sheet rather than from anything hard-coded per page:
+
+1. Welcome Back
+2. Last Week: Predictions vs. Results — `recap`
+3. Weekly Awards + Analytics — `awards`
+4. Trades + Waiver Moves — `trades`
+5. Hot Seat — `hotseat`
+6. Team of the Week — `totw`
+7. Matchups — the matchup cards and Peter's picks
+8. Lock of the Week
+
+The look-back and between-weeks segments come first and the forward-looking
+matchup previews sit near the end, where the host actually reaches them.
+`RUNDOWN` in `build.py` maps agenda rows to sections by keyword; a segment with
+no agenda row of its own (the beach-drink draft, which `BEACH_DRINKS` appends)
+falls back to that same order, after the rows that are listed. Reorder the
+agenda rows in the sheet and the page follows.
+
+`build.py` refuses to write a page whose sections or jump-to nav disagree with
+the agenda it just rendered, so the two can't drift apart.
+
 ## Trades
 
 The cached preview snapshot is always *pre-trade*. `apply_trades.py` holds the
