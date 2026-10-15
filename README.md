@@ -71,6 +71,27 @@ agenda rows in the sheet and the page follows.
 `build.py` refuses to write a page whose sections or jump-to nav disagree with
 the agenda it just rendered, so the two can't drift apart.
 
+## Kickoff times
+
+`enrich.py` reads ESPN's public schedule (`cdn.espn.com/core/nfl/schedule`) and
+stamps every starter with its NFL opponent and that game's kickoff in
+America/Chicago — the time the host reads on air — so a lineup card says
+`DAL @GB Sun 7:20p`. Thursday, Sunday windows and Monday night all fall out of
+the converted local time rather than a hard-coded slot, and a neutral-site
+international game carries its city (`@JAX Sun 8:30a London`) so an 8:30 a.m.
+Central kickoff doesn't read like a mistake.
+
+A team with no game that week is labelled `BYE`, but only when ESPN's team list
+(`site.api.espn.com/.../nfl/teams`) confirms the abbreviation is a real NFL team
+— an abbreviation the schedule doesn't recognise is a mapping bug, and
+`build.py` refuses to write the page. A game ESPN hasn't timed yet renders
+`time TBD`; no kickoff is ever guessed. `build.py` prints the per-page counts
+(starters, timed, bye, international, untimed) on every run.
+
+```bash
+python3 enrich.py --selftest   # kickoff conversion, incl. the CST/CDT switch
+```
+
 ## Trades
 
 The cached preview snapshot is always *pre-trade*. `apply_trades.py` holds the

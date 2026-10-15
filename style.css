@@ -121,6 +121,11 @@ table.wt td.who{text-align:left;color:#cfdcf2;font-size:12.5px;background:transp
 table.wt td.hot{color:var(--gold2);font-weight:700;background:#16305c}
 table.wt td.zero{color:#40507080}
 table.lc .opp{color:#7f92b3;font-weight:400;white-space:nowrap}
+table.lc .opp.bye{color:#8a7a4a;letter-spacing:.8px;font-weight:700;font-size:10.5px}
+table.lc .kick{color:#6c7f9f}
+table.lc .kick.tbd{font-style:italic}
+table.lc .intl{color:var(--gold);font-size:10.5px;letter-spacing:.6px}
+.tznote{margin:-4px 0 14px;font-size:11.5px;letter-spacing:.4px;color:var(--dim)}
 table.wt td .pct{display:block;font-size:10px;font-weight:400;color:var(--dim);margin-top:2px;letter-spacing:.4px}
 table.wt td.hot .pct{color:var(--gold)}
 /* trades */

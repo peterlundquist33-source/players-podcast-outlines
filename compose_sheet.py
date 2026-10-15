@@ -148,7 +148,7 @@ def roster_cell(m, team_window):
 def main(deep_path, week, out_path, season=2026):
     deep = json.load(open(deep_path))
     by_owner = {frozenset((m["away_owner"], m["home_owner"])): m for m in deep}
-    team_window, _, _ = nfl_windows(season, week)
+    team_window, _, _, _ = nfl_windows(season, week)
 
     V = [["" for _ in range(COLS)] for _ in range(ROWS)]
 

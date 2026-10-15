@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build podcast outline pages from a Google Sheet export (tools/wk*.json)."""
-import json, html, re, sys, pathlib
+import json, html, re, sys, pathlib, collections
 
 ORDER = ["THURSDAY NIGHT GAME", "SUNDAY NOON GAME", "SUNDAY AFTERNOON GAME",
          "SUNDAY NIGHT GAME", "MONDAY NIGHT GAME"]
@@ -426,7 +426,18 @@ def render_deep(A, E, m, slug):
         flag = ' <i class="inj" title="%s">!</i>' % E(pl["injury"]) if pl["injury"] else ''
         pro = E(pl["pro"])
         if pl.get("opp"):
-            pro += ' <span class="opp">%s</span>' % E(pl["opp"])
+            # Matchup, then the Central kickoff the host reads on air. A game
+            # ESPN hasn't timed says so; it never gets a guessed slot.
+            tag = E(pl["opp"])
+            if pl.get("kick"):
+                tag += ' <span class="kick">%s</span>' % E(pl["kick"])
+            else:
+                tag += ' <span class="kick tbd">time TBD</span>'
+            if pl.get("site"):
+                tag += ' <span class="intl">%s</span>' % E(pl["site"])
+            pro += ' <span class="opp">%s</span>' % tag
+        elif pl.get("bye"):
+            pro += ' <span class="opp bye">BYE</span>'
         return '%s <span class="dim">%s</span>%s' % (E(pl["name"]), pro, flag)
 
     A('<table class="lc"><thead><tr>')
@@ -636,6 +647,9 @@ def page(V, week, season, deep=()):
 
     def emit_matchups():
         A('<h2 class="hdr">Matchups</h2>')
+        if any(p.get("kick") for dm in deep for r in dm["lineup"]
+               for p in (r["a"], r["h"]) if p):
+            A('<p class="tznote">Lineup-card kickoffs are Central time.</p>')
         for m in b:
             A(f'<section id="{slug(m["away"] + "-" + m["home"])}" class="card game">')
             A(f'<div class="slot">{E(m["slot"].replace(" GAME",""))}</div>')
@@ -717,6 +731,35 @@ def page(V, week, season, deep=()):
 MARKER = {"matchups": '<h2 class="hdr">Matchups</h2>'}
 
 
+def check_kickoffs(deep):
+    """Every starter must resolve to an opponent + kickoff, or to a bye.
+
+    Returns (problems, counts). A starter whose pro team the NFL schedule
+    doesn't recognise is a mapping bug and blocks the write; a game ESPN has
+    not timed yet only reports, because the page says "time TBD" honestly.
+    """
+    starters = [p for m in deep for r in m["lineup"]
+                for p in (r["a"], r["h"]) if p]
+    if not any("kick" in p or "bye" in p for p in starters):
+        # deep file predates kickoff enrichment; nothing to check.
+        return [], {"starters": len(starters), "skipped": True}
+    counts = collections.Counter(starters=len(starters))
+    problems = []
+    for p in starters:
+        who = "%s (%s)" % (p.get("name", "?"), p.get("pro", "?"))
+        if p.get("opp"):
+            counts["timed" if p.get("kick") else "no_time"] += 1
+            if not p.get("kick"):
+                print("  KICKOFF: no time yet for", who, p["opp"])
+            if p.get("site"):
+                counts["international"] += 1
+        elif p.get("bye"):
+            counts["bye"] += 1
+        else:
+            problems.append(f"{who} has no NFL opponent and is not on a bye")
+    return problems, counts
+
+
 def check_order(doc):
     """Section headings and jump-nav links must both follow the rundown.
 
@@ -754,6 +797,12 @@ if __name__ == "__main__":
         for p in bad:
             print("  TRADE COPY:", p)
         raise SystemExit("deal cards disagree with the trade ledger; refusing to write")
+    bad, counts = check_kickoffs(deep)
+    print("  kickoffs:", ", ".join(f"{k}={v}" for k, v in sorted(counts.items())))
+    if bad:
+        for p in bad:
+            print("  KICKOFF:", p)
+        raise SystemExit("a starter's NFL team is unmapped; refusing to write")
     V = load(src)
     doc = page(V, week, season, deep)
     bad = check_order(doc)
