@@ -269,6 +269,38 @@ TEAM_OF_WEEK = {
         "asof": "Roster as of Week 4. Isaac has since traded Jaylen Warren and "
                 "DK Metcalf to Logan for Saquon Barkley and J.K. Dobbins.",
     },
+    7: {
+        "meta": [
+            ("Team Name", "Taylor Gang"),
+            ("Owner", "CJ Woda"),
+            ("Record", "4-2"),
+            ("Best Finish", "8-6 (2024)"),
+            ("Playoff Appearances", "1"),
+            ("Fun Fact", "Taylor Gang is 4-2 for the first time in CJ's 25-31 career "
+             "outside his lone winning season (8-6, 2024). Tyler Shough, a 14th-round "
+             "pick, has taken the job from 6th-round Joe Burrow and is already the "
+             "league's #5 scoring quarterback through three starts."),
+        ],
+        "roster": [
+            ("QB", "Tyler Shough", "14", "QB #5"),
+            ("RB", "Jonathan Taylor", "1", "RB #6"),
+            ("RB", "Chuba Hubbard", "8", "RB #13"),
+            ("WR", "Parker Washington", "7", "WR #11"),
+            ("WR", "DK Metcalf", "FA", "WR #28"),
+            ("TE", "Juwan Johnson", "FA", "TE #7"),
+            ("FLEX", "Emanuel Wilson", "FA", "RB #31"),
+            ("D/ST", "Steelers D/ST", "15", "D/ST #3"),
+            ("K", "Ka'imi Fairbairn", "13", "K #2"),
+        ],
+        "impact": [
+            "Jonathan Taylor — 118.5 through six weeks, RB #6 on the season; the Rd-1 pick",
+            "Tyler Shough — 112.1 through three starts, QB #5 on the season; the Rd-14 pick",
+            "Chuba Hubbard — 98.1 through four starts, RB #13 on the season; the Rd-8 pick",
+            "Parker Washington — 91.9 through six weeks, WR #11 on the season; the Rd-7 pick",
+            "Joe Burrow — 76.6 through two starts, now benched behind Shough; the Rd-6 pick",
+        ],
+        "asof": "Roster as of Week 7.",
+    },
 }
 
 def check_trades(week):

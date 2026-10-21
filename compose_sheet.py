@@ -40,70 +40,62 @@ AGENDA = [
 # (label, body, who) — rows 21-24, cols B/C/E
 AWARDS = [
     ("Shit Cup Performance",
-     "Leif — 82.82, the lowest score of Week 4 and 46.0 under his own 128.8 projection, "
-     "the second-highest on the slate behind Adam's 133.2. All nine starters finished under: "
-     "Josh Allen 18.5 (22.2 proj), McCaffrey 16.0 (20.3), Henry 15.9 (20.3), Davante Adams "
-     "7.2 (15.6), Diggs 8.5 (12.8), Schultz 2.9 (9.0), Montgomery 4.3 (13.5), Texans D/ST "
-     "3.0 (4.9), Myers 6.5 (10.2). Lost by 80.2, the widest margin of the week.",
-     "Leif Engen"),
-    ("Statement Win",
-     "Peter — 162.98 over Leif's 82.82. Top score of Week 4, widest margin of the week "
-     "(80.2), and he was the underdog on paper by 16.7 projected points. Three starters "
-     "cleared projection by double digits: Kyle Monangai 28.0 (+19.7), Romeo Doubs 23.8 "
-     "(+14.0) and Tee Higgins 26.7 (+13.0), with Bijan Robinson adding 27.7. Now 4-0 with "
-     "350.7 points against, fewest in the league. Runner-up: Christian's 157.48, by 44.6.",
+     "Peter — 69.78, the lowest score of Week 6 and 49.1 under his own 118.9 projection. "
+     "Bijan Robinson 7.3 on a 23.0 projection (-15.7), A.J. Brown 5.7 on 12.7 while "
+     "Questionable, Denzel Boston 2.5 on 13.5, and Cam Ward 6.8 on 13.0 — four of nine "
+     "starters finished in single digits. Lost to Kaleb by 24.58 as the betting favorite.",
      "Peter Lundquist"),
+    ("Statement Win",
+     "Logan — 152.52 over John's 100.08, the week's largest margin (52.44) and Logan's "
+     "2nd-highest score of the season. Germie Bernard 25.7 on a 9.9 projection (+15.8, "
+     "the week's single biggest overperformance) and Isaiah Likely 23.9 on 14.7 (+9.2) "
+     "both nearly doubled their numbers; Chase McLaughlin added 18.6 from the kicker spot.",
+     "Logan Rezac"),
     ("Biggest Disappointment",
-     "Rashee Rice — 0.00 on a 14.9 projection, the worst projection-to-actual gap of any "
-     "Week 4 starter, and he went in QUESTIONABLE. CJ survived it anyway, 114.64-110.50. "
-     "Runner-up, and the one that actually decided a game: Ja'Marr Chase, 5.70 on a 20.4 "
-     "projection (-14.7), in Isaac's 25.4-point loss. (Week 3 precedent: this award goes "
-     "to the worst projection-to-actual gap among starters.)",
-     "CJ Woda"),
+     "John — projected 138.0, the week's highest pre-game number, and managed just "
+     "100.08, a 37.9-point miss. Kyren Williams 9.7 on a 21.0 projection and Brock Bowers "
+     "11.0 on 19.8 were the two biggest gaps; the Jaguars D/ST went negative (-2.0). "
+     "Fell to 3-3 off the week's steepest favorite-to-underperform.",
+     "John Lundquist"),
     ("Shining Star",
-     "Tetairoa McMillan — 45.20, the top starter score of Week 4 and +29.4 over projection, "
-     "the biggest overperformance on the slate. It still wasn't enough: Logan lost "
-     "112.92-157.48 and is 0-4. Runner-up: CeeDee Lamb, 41.30 (+24.4) for Christian, which "
-     "did win its week.",
+     "Germie Bernard — 25.7 on a 9.9 projection, the biggest single overperformance of "
+     "Week 6 (+15.8), off Logan's bench. Helped carry Runnin' Rezac to the week's "
+     "largest margin of victory and Logan's 2nd-highest score of the season.",
      "Logan Rezac"),
 ]
 
-# rows 15-17, col B — order fixed by Peter: Noah, Logan, Mitch
+# rows 15-17, col B — order fixed by power-rank severity: Isaac, Noah, Mitchell
 HOT_SEAT = [
-    "Maye Have Downs — Noah · 0-4, 89.9 ppg and 359.5 PF (both last in the league), "
-    "all-play 7-37, power #12. Projected favorite again on Monday night, 117.1 to Kaleb's "
-    "104.9 (57%) — that is four of five weeks as the projected favorite, at 0-4. "
-    "No excuses left in that one.",
-    "Runnin' Rezac — Logan · 0-4 with 603.6 points against, the most any team has "
-    "allowed, luck -1.7, power #11. He moved four players in Thursday's two trades and "
-    "the post-trade card still reads 75.0, because three starter slots are empty. "
-    "Burrow for Hurts at quarterback is the only clear gain, and he sold DK Metcalf "
-    "four hours after acquiring him.",
-    "Finding Nico — Mitchell · 1-3, 112.3 ppg, power #8, coming off a 44.3-point loss to "
-    "Adam. Projected 80% to beat Logan. Lose this one and the playoff story gets hard "
-    "to tell.",
+    "A Slap in the Face — Isaac · 2-4, dead last in the league on 25.8% all-play, the "
+    "worst mark in Players League, and 12th in PF/G (99.8). Terry McLaurin OUT, Jameis "
+    "Winston and Saquon Barkley both Questionable. Projected a league-low 69.2 against "
+    "Logan's 123.0 — an 81% win probability for Logan.",
+    "Wilson Law Firm — Noah · 1-5, last in the league in PF/G (101.6) and 2nd-worst "
+    "all-play (30.3%). Faces 4-2 Peter, who leads their all-time series 6-2.",
+    "Finding Nico — Mitchell · 1-5 but 111.3 PF/G with a -1.5 luck rating — the record "
+    "undersells the roster. Jordan Mason on IR, Tyler Warren and Matthew Golden both "
+    "Questionable. Projected 111.9 against Kaleb's 116.4.",
 ]
 
 # Fantasy slot -> (away owner, home owner), in the order the pipeline ranked them.
 # Slot headings must match build.py's ORDER to sort correctly.
 SLOTS = [
-    ("THURSDAY NIGHT GAME",    "Isaac",     "Grant"),
-    ("SUNDAY NOON GAME",       "John",      "CJ"),
-    ("SUNDAY NOON GAME",       "Logan",     "Mitchell"),
-    ("SUNDAY AFTERNOON GAME",  "Christian", "Leif"),
-    ("SUNDAY NIGHT GAME",      "Adam",      "Peter"),
-    ("MONDAY NIGHT GAME",      "Noah",      "Kaleb"),
+    ("THURSDAY NIGHT GAME",           "Isaac",     "Logan"),
+    ("SUNDAY NOON GAME",              "Kaleb",     "Mitchell"),
+    ("PARIS GAME — SUNDAY MORNING",   "Grant",     "Christian"),
+    ("SUNDAY AFTERNOON GAME",         "Noah",      "Peter"),
+    ("SUNDAY NIGHT GAME",             "CJ",        "Leif"),
+    ("MONDAY NIGHT GAME",             "John",      "Adam"),
 ]
 
 # All-time head-to-head, read off js/teams-data.js in the players-league repo.
 H2H = {
-    ("Isaac", "Grant"):     "Grant leads Isaac 4-3.",
-    ("John", "CJ"):         "Split 2-2.",
-    ("Logan", "Mitchell"):  "Split 2-2.",
-    ("Christian", "Leif"):  "Christian leads Leif 3-1.",
-    ("Adam", "Peter"):      "Peter leads Adam 4-1 — the best record anyone holds on Adam "
-                            "(Isaac 5-3, Grant 3-2 and Kaleb 4-3 are also ahead of him).",
-    ("Noah", "Kaleb"):      "Noah leads Kaleb 5-1.",
+    ("Isaac", "Logan"):     "Isaac leads Logan 6-1.",
+    ("Kaleb", "Mitchell"):  "Kaleb leads Mitchell 4-3.",
+    ("Grant", "Christian"): "Christian leads Grant 5-2.",
+    ("Noah", "Peter"):      "Noah leads Peter 6-2.",
+    ("CJ", "Leif"):         "CJ and Leif are dead even 4-4 — CJ is Leif's listed rival.",
+    ("John", "Adam"):       "Adam leads John 6-1.",
 }
 
 # ---------------------------------------------------------------- composition
