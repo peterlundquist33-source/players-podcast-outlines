@@ -67,14 +67,15 @@ AWARDS = [
 # rows 15-17, col B — order fixed by power-rank severity: Isaac, Noah, Mitchell
 HOT_SEAT = [
     "A Slap in the Face — Isaac · 2-4, dead last in the league on 25.8% all-play, the "
-    "worst mark in Players League, and 12th in PF/G (99.8). Terry McLaurin OUT, Jameis "
-    "Winston and Saquon Barkley both Questionable. Projected a league-low 69.2 against "
-    "Logan's 123.0 — an 81% win probability for Logan.",
-    "Wilson Law Firm — Noah · 1-5, last in the league in PF/G (101.6) and 2nd-worst "
-    "all-play (30.3%). Faces 4-2 Peter, who leads their all-time series 6-2.",
+    "worst mark in Players League, and 12th in PF/G (99.8). Saquon Barkley and T.J. "
+    "Hockenson both Questionable. Projected 128.3 against Logan's 123.2 — Logan still "
+    "favored at 53%.",
+    "Wilson Law Firm — Noah · 1-5, 2nd-worst in the league in PF/G (101.6) and "
+    "2nd-worst all-play (30.3%). Faces 4-2 Peter — but Noah actually leads their "
+    "all-time series 6-2.",
     "Finding Nico — Mitchell · 1-5 but 111.3 PF/G with a -1.5 luck rating — the record "
-    "undersells the roster. Jordan Mason on IR, Tyler Warren and Matthew Golden both "
-    "Questionable. Projected 111.9 against Kaleb's 116.4.",
+    "undersells the roster. Jordan Mason on IR, Travis Kelce and Matthew Golden both "
+    "Questionable. Projected 121.7 against Kaleb's 116.5.",
 ]
 
 # Fantasy slot -> (away owner, home owner), in the order the pipeline ranked them.
