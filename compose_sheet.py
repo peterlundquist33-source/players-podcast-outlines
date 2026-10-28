@@ -38,65 +38,71 @@ AGENDA = [
 ]
 
 # (label, body, who) — rows 21-24, cols B/C/E
+# Week 7 recap (this is what Week 8's show looks back on).
 AWARDS = [
     ("Shit Cup Performance",
-     "Peter — 69.78, the lowest score of Week 6 and 49.1 under his own 118.9 projection. "
-     "Bijan Robinson 7.3 on a 23.0 projection (-15.7), A.J. Brown 5.7 on 12.7 while "
-     "Questionable, Denzel Boston 2.5 on 13.5, and Cam Ward 6.8 on 13.0 — four of nine "
-     "starters finished in single digits. Lost to Kaleb by 24.58 as the betting favorite.",
-     "Peter Lundquist"),
+     "Mitchell — 79.38, the lowest score of Week 7 and 41.72 under his own 121.1 "
+     "projection. Nico Collins 2.6 on a 16.7 projection (-14.1), Roschon Johnson 1.3 on "
+     "9.1 (-7.8), and Matthew Golden 9.9 while Questionable — six of nine starters "
+     "finished under 10 points. Fell to 1-6.",
+     "Mitchell Max"),
     ("Statement Win",
-     "Logan — 152.52 over John's 100.08, the week's largest margin (52.44) and Logan's "
-     "2nd-highest score of the season. Germie Bernard 25.7 on a 9.9 projection (+15.8, "
-     "the week's single biggest overperformance) and Isaiah Likely 23.9 on 14.7 (+9.2) "
-     "both nearly doubled their numbers; Chase McLaughlin added 18.6 from the kicker spot.",
-     "Logan Rezac"),
+     "Kaleb — 131.52 over Mitchell's 79.38, the week's largest margin (52.14). Tre "
+     "Tucker 21.3 on a 10.5 projection from the FLEX spot (+10.8) and Ashton Jeanty 21.6 "
+     "on 17.0 (+4.6) led the way; Harold Fannin Jr. added 13.1 from the TE spot.",
+     "Kaleb Feahn"),
     ("Biggest Disappointment",
-     "John — projected 138.0, the week's highest pre-game number, and managed just "
-     "100.08, a 37.9-point miss. Kyren Williams 9.7 on a 21.0 projection and Brock Bowers "
-     "11.0 on 19.8 were the two biggest gaps; the Jaguars D/ST went negative (-2.0). "
-     "Fell to 3-3 off the week's steepest favorite-to-underperform.",
-     "John Lundquist"),
+     "Adam — projected 135.6, the 2nd-highest pre-game number in the league, and "
+     "managed just 103.02, a 32.58-point miss. Jalen Coker 1.9 on a 15.4 projection "
+     "(-13.5) and Sam LaPorta 2.8 on 12.7 (-9.9) were the two biggest gaps; the "
+     "Panthers D/ST went negative (-3.0). Dropped his first game of the season, "
+     "falling to 6-1, outright to John.",
+     "Adam Stockwell"),
     ("Shining Star",
-     "Germie Bernard — 25.7 on a 9.9 projection, the biggest single overperformance of "
-     "Week 6 (+15.8), off Logan's bench. Helped carry Runnin' Rezac to the week's "
-     "largest margin of victory and Logan's 2nd-highest score of the season.",
-     "Logan Rezac"),
+     "Tony Pollard — 36.5 on a 13.8 projection, the biggest single overperformance of "
+     "Week 7 (+22.7), off Grant's bench. Helped carry Amon that inhaler to the week's "
+     "highest score (158.60) and a 36.34-point win over Christian.",
+     "Grant Sawyer"),
 ]
 
-# rows 15-17, col B — order fixed by power-rank severity: Isaac, Noah, Mitchell
+# rows 15-17, col B — order fixed by power-rank severity: Mitchell, Noah, Isaac
+# (power board ranks 12, 11, 10 of 12 after Week 7)
 HOT_SEAT = [
-    "A Slap in the Face — Isaac · 2-4, dead last in the league on 25.8% all-play, the "
-    "worst mark in Players League, and 12th in PF/G (99.8). Saquon Barkley and T.J. "
-    "Hockenson both Questionable. Projected 128.3 against Logan's 123.2 — Logan still "
-    "favored at 53%.",
-    "Wilson Law Firm — Noah · 1-5, 2nd-worst in the league in PF/G (101.6) and "
-    "2nd-worst all-play (30.3%). Faces 4-2 Peter — but Noah actually leads their "
-    "all-time series 6-2.",
-    "Finding Nico — Mitchell · 1-5 but 111.3 PF/G with a -1.5 luck rating — the record "
-    "undersells the roster. Jordan Mason on IR, Travis Kelce and Matthew Golden both "
-    "Questionable. Projected 121.7 against Kaleb's 116.5.",
+    "Finding Nico — Mitchell · 1-6, dead last in the league on 35.1% all-play and "
+    "10th in PF/G (106.7). Jahmyr Gibbs, Matthew Golden, DJ Moore and Tyler Warren all "
+    "Questionable. Projected 120.5 against Noah's 122.2 — in the basement-bowl matchup, "
+    "Mitchell's still a 51% favorite despite the lower number.",
+    "Wilson Law Firm — Noah · 1-6, dead last in the league in PF/G (102.5) and dead "
+    "last in all-play (31.2%) — the only team bottom of both. Faces 1-6 Mitchell, who "
+    "leads their all-time series 7-2, and is still the underdog at 49% with the higher "
+    "projection.",
+    "A Slap in the Face — Isaac · 3-4, 11th in the league on 32.5% all-play and 11th "
+    "in PF/G (103.6). Saquon Barkley and Ja'Marr Chase both Questionable. Projected "
+    "86.6 against Adam's 134.1 — Adam's a 76% favorite.",
 ]
 
 # Fantasy slot -> (away owner, home owner), in the order the pipeline ranked them.
-# Slot headings must match build.py's ORDER to sort correctly.
+# Slot headings must match build.py's ORDER to sort correctly. No international game
+# touches any roster this week, so there's no Paris slot; Sunday Afternoon covers two
+# matchups instead since the real NFL slate has multiple simultaneous late games.
 SLOTS = [
-    ("THURSDAY NIGHT GAME",           "Isaac",     "Logan"),
-    ("SUNDAY NOON GAME",              "Kaleb",     "Mitchell"),
-    ("PARIS GAME — SUNDAY MORNING",   "Grant",     "Christian"),
-    ("SUNDAY AFTERNOON GAME",         "Noah",      "Peter"),
-    ("SUNDAY NIGHT GAME",             "CJ",        "Leif"),
-    ("MONDAY NIGHT GAME",             "John",      "Adam"),
+    ("THURSDAY NIGHT GAME",     "Logan",     "Grant"),
+    ("SUNDAY NOON GAME",        "Leif",      "Kaleb"),
+    ("SUNDAY AFTERNOON GAME",   "Christian", "CJ"),
+    ("SUNDAY AFTERNOON GAME",   "Peter",     "John"),
+    ("SUNDAY NIGHT GAME",       "Adam",      "Isaac"),
+    ("MONDAY NIGHT GAME",       "Mitchell",  "Noah"),
 ]
 
 # All-time head-to-head, read off js/teams-data.js in the players-league repo.
+# Checked for any current-season (2026) meeting between these pairs first — none yet.
 H2H = {
-    ("Isaac", "Logan"):     "Isaac leads Logan 6-1.",
-    ("Kaleb", "Mitchell"):  "Kaleb leads Mitchell 4-3.",
-    ("Grant", "Christian"): "Christian leads Grant 5-2.",
-    ("Noah", "Peter"):      "Noah leads Peter 6-2.",
-    ("CJ", "Leif"):         "CJ and Leif are dead even 4-4 — CJ is Leif's listed rival.",
-    ("John", "Adam"):       "Adam leads John 6-1.",
+    ("Logan", "Grant"):      "Grant leads Logan 5-4.",
+    ("Leif", "Kaleb"):       "Kaleb leads Leif 4-3.",
+    ("Christian", "CJ"):     "Christian leads CJ 6-2.",
+    ("Peter", "John"):       "John leads Peter 6-3.",
+    ("Adam", "Isaac"):       "Isaac leads Adam 5-3.",
+    ("Mitchell", "Noah"):    "Mitchell leads Noah 7-2.",
 }
 
 # ---------------------------------------------------------------- composition
