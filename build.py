@@ -50,7 +50,8 @@ OWNERS = {
     "Amon that inhaler": "Grant", "PA Dive Your Way": "Kaleb",
     "Finding Nico": "Mitchell", "A Slap in the Face": "Isaac",
     "Maye Be Cook'd": "Noah", "Maye, Quit Football": "Noah",
-    "Maye Have Downs": "Noah", "Taylor Gang": "CJ",
+    "Maye Have Downs": "Noah", "I Didn't Hear No Bell": "Noah",
+    "Taylor Gang": "CJ",
 }
 # Names the sheet still has under an old label.
 RENAMES = {"Achane Smokin CiGarretts": "Maye, Quit Football",
