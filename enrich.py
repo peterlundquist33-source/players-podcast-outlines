@@ -10,6 +10,9 @@ WINDOWS = ["Thu", "Sun AM", "Sun Noon", "Sun Aft", "SNF", "MNF"]
 # The show is recorded and listened to on Central time, so every kickoff is
 # stated in Chicago wall-clock time rather than UTC or the stadium's zone.
 SHOW_TZ = ZoneInfo("America/Chicago")
+# NFL game windows (Sun AM/Noon/Aft, SNF, MNF) are defined in Eastern time,
+# independent of where the show itself is watched/recorded.
+ET = ZoneInfo("America/New_York")
 TEAMS_URL = ("https://site.api.espn.com/apis/site/v2/sports/football/nfl/"
              "teams?limit=50")
 
@@ -73,21 +76,38 @@ def nfl_windows(season, week):
             at = kickoff_ct(iso)
             for t in teams:
                 kick[t] = {"at": at, "site": site}
-            dow = day[-2:]                         # day of month
-            hh = int(iso[11:13]) if len(iso) > 13 else 18
-            # UTC -> window
-            if day == sorted(d["content"]["schedule"])[0]:
-                w = "Thu"
-            elif hh == 0 and day == sorted(d["content"]["schedule"])[-1]:
-                w = "MNF"
-            elif hh == 0:
-                w = "SNF"
-            elif hh < 17:
-                w = "Sun AM"        # London/Europe morning kickoff
-            elif hh == 17:
-                w = "Sun Noon"
+            # Classify on the actual US/Eastern wall-clock weekday + hour
+            # (DST-safe), not a fixed UTC-hour offset. A fixed offset drifts
+            # by an hour every fall/spring clock change and silently
+            # mislabels the whole slate once it does — caught 2026-11-11 on
+            # the Week 10 build, the first week after the Nov 1 fallback,
+            # where every 1pm ET game and both the SNF/MNF games came back
+            # wrong because the old thresholds assumed EDT (UTC-4) year
+            # round.
+            dt_et = None
+            for fmt in ("%Y-%m-%dT%H:%MZ", "%Y-%m-%dT%H:%M:%SZ"):
+                try:
+                    dt_et = (datetime.strptime(iso, fmt)
+                              .replace(tzinfo=timezone.utc).astimezone(ET))
+                    break
+                except ValueError:
+                    continue
+            if dt_et is None:
+                w = "Sun Aft"       # malformed/missing kickoff; bucket plainly
             else:
-                w = "Sun Aft"
+                dow, hh = dt_et.strftime("%a"), dt_et.hour
+                if dow == "Thu":
+                    w = "Thu"
+                elif dow == "Mon":
+                    w = "MNF"
+                elif dow == "Sun" and hh >= 19:
+                    w = "SNF"
+                elif dow == "Sun" and hh < 13:
+                    w = "Sun AM"     # London/Europe morning kickoff
+                elif dow == "Sun" and hh == 13:
+                    w = "Sun Noon"
+                else:
+                    w = "Sun Aft"
             for t in teams:
                 out[t] = w
             games.append((w, teams))
