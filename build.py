@@ -23,6 +23,7 @@ RUNDOWN = [
     ("hotseat",  ("hot seat",)),
     ("totw",     ("team of the week",)),
     ("matchups", ("matchup",)),
+    ("boardpicks", ("beat the board",)),
     ("drinks",   ("drink",)),
 ]
 # Fallback for a segment with no agenda row of its own (and for a week with no
@@ -238,6 +239,31 @@ BEACH_DRINKS = {
              "0–4, 89.9 ppg and 359.5 PF, both last, all-play 7–37, power #12 — "
              "the only thing on this list nobody would finish."),
         ],
+    },
+}
+
+# Beat the Board vote tallies, by week — who every submitted owner picked to
+# win each matchup, pulled from the live Firestore picks (players-league
+# tools/board.py fetch_picks()), not from the sheet. These are a snapshot as
+# of composition time; picks stay open until the Thursday lock, so re-pull
+# before recording if it matters.
+BOARD_PICKS = {
+    12: {
+        "asof": "Nov 24, 1:58p CT — 8 of 12 submitted",
+        "rows": [
+            ("Adam vs. Noah", "Adam 7 — Noah 1", "Mitchell is the lone contrarian"),
+            ("John vs. Logan", "John 4 — Logan 4", "Split down the middle"),
+            ("Christian vs. Isaac", "Isaac 4 — Christian 4", "Split down the middle"),
+            ("Grant vs. Leif", "Grant 5 — Leif 2", "Grant picked against his own team"),
+            ("CJ vs. Mitchell", "Mitchell 7 — CJ 1", "CJ's the lone vote for himself"),
+            ("Kaleb vs. Peter", "Peter 7 — Kaleb 1", ""),
+        ],
+        "notes": [
+            "Grant is the only owner picking against his own matchup.",
+            "CJ is the only owner picking himself to win while being nearly "
+            "unanimous underdog.",
+        ],
+        "missing": ["Isaac", "Christian", "Kaleb", "Noah"],
     },
 }
 
@@ -560,6 +586,7 @@ def page(V, week, season, deep=()):
     recap = RECAP.get(int(week))
     trades = TRADES.get(int(week))
     drinks = BEACH_DRINKS.get(int(week))
+    board_picks = BOARD_PICKS.get(int(week))
     if trades:
         # Verified trades are in hand, so the sheet's "Trades + Waiver Moves"
         # row no longer needs its not-wired-up placeholder: point it at the
@@ -605,6 +632,8 @@ def page(V, week, season, deep=()):
         if key == "totw":    return [("Team of the Week", "totw")] if totw_roster else []
         if key == "hotseat": return [("Hot Seat", "hotseat")] if hotseat else []
         if key == "drinks":  return [(drinks["title"], "drinks")] if drinks else []
+        if key == "boardpicks":
+            return [("Beat the Board — Picks", "boardpicks")] if board_picks else []
         if key == "matchups":
             return [(f'{m["slot"].replace(" GAME","").title()} · {m["away"]} v {m["home"]}',
                      slug(m["away"] + "-" + m["home"])) for m in b]
@@ -763,9 +792,27 @@ def page(V, week, season, deep=()):
               f'<dd>{E(note)}<span class="who">{E(team)} · {E(owner)}</span></dd>')
         A('</dl></section>')
 
+    def emit_board_picks():
+        if not board_picks: return
+        A('<section id="boardpicks" class="card"><h2>Beat the Board — Picks</h2>')
+        A(f'<p class="h2h"><b>As of</b> {E(board_picks["asof"])}</p>')
+        A('<table><thead><tr><th>Matchup</th><th>Votes</th><th>Note</th></tr></thead><tbody>')
+        for label, tally, note in board_picks["rows"]:
+            A(f'<tr><td>{E(label)}</td><td>{E(tally)}</td><td>{E(note)}</td></tr>')
+        A('</tbody></table>')
+        if board_picks.get("notes"):
+            A('<h4>Notes</h4><ul class="over">')
+            for n in board_picks["notes"]:
+                A(f'<li>{E(n)}</li>')
+            A('</ul>')
+        if board_picks.get("missing"):
+            A(f'<p class="h2h"><b>Still to pick</b> {E(", ".join(board_picks["missing"]))}</p>')
+        A('</section>')
+
     emit = {"recap": emit_recap, "awards": emit_awards, "trades": emit_trades,
             "hotseat": emit_hotseat, "totw": emit_totw,
-            "matchups": emit_matchups, "drinks": emit_drinks}
+            "matchups": emit_matchups, "drinks": emit_drinks,
+            "boardpicks": emit_board_picks}
     for key in order:
         emit[key]()
 
