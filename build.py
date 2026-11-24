@@ -249,21 +249,49 @@ BEACH_DRINKS = {
 # before recording if it matters.
 BOARD_PICKS = {
     12: {
-        "asof": "Nov 24, 1:58p CT — 8 of 12 submitted",
-        "rows": [
-            ("Adam vs. Noah", "Adam 7 — Noah 1", "Mitchell is the lone contrarian"),
-            ("John vs. Logan", "John 4 — Logan 4", "Split down the middle"),
-            ("Christian vs. Isaac", "Isaac 4 — Christian 4", "Split down the middle"),
-            ("Grant vs. Leif", "Grant 5 — Leif 2", "Grant picked against his own team"),
-            ("CJ vs. Mitchell", "Mitchell 7 — CJ 1", "CJ's the lone vote for himself"),
-            ("Kaleb vs. Peter", "Peter 7 — Kaleb 1", ""),
+        "asof": "Nov 24, 2:17p CT — 9 of 12 submitted",
+        # Columns, in slate order (same grouping as the matchup cards below).
+        "matchups": [
+            ("CJ v Mitchell", "cj-mitchell"),
+            ("John v Logan", "john-logan"),
+            ("Christian v Isaac", "christian-isaac"),
+            ("Grant v Leif", "grant-leif"),
+            ("Kaleb v Peter", "kaleb-peter"),
+            ("Adam v Noah", "adam-noah"),
         ],
-        "notes": [
-            "Grant is the only owner picking against his own matchup.",
-            "CJ is the only owner picking himself to win while being nearly "
-            "unanimous underdog.",
-        ],
-        "missing": ["Isaac", "Christian", "Kaleb", "Noah"],
+        # Rows, same owner grouping as the columns above.
+        "owners": ["CJ", "Mitchell", "John", "Logan", "Christian", "Isaac",
+                   "Grant", "Leif", "Kaleb", "Peter", "Adam", "Noah"],
+        "picks": {
+            "Adam":     {"cj-mitchell": "Mitchell", "john-logan": "Logan",
+                         "christian-isaac": "Isaac", "grant-leif": "Grant",
+                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
+            "CJ":       {"cj-mitchell": "CJ", "john-logan": "Logan",
+                         "christian-isaac": "Christian", "grant-leif": "Grant",
+                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
+            "Grant":    {"cj-mitchell": "Mitchell", "john-logan": "John",
+                         "christian-isaac": "Isaac", "grant-leif": "Leif",
+                         "kaleb-peter": "Kaleb", "adam-noah": "Adam"},
+            "John":     {"cj-mitchell": "Mitchell", "john-logan": "John",
+                         "christian-isaac": "Isaac", "grant-leif": "Grant",
+                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
+            "Kaleb":    {"cj-mitchell": "Mitchell", "john-logan": "Logan",
+                         "christian-isaac": "Christian", "grant-leif": "Grant",
+                         "kaleb-peter": "Kaleb", "adam-noah": "Adam"},
+            "Leif":     {"cj-mitchell": "Mitchell", "john-logan": "John",
+                         "christian-isaac": "Isaac", "grant-leif": "Grant",
+                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
+            "Logan":    {"cj-mitchell": "Mitchell", "john-logan": "Logan",
+                         "christian-isaac": "Christian", "grant-leif": "Grant",
+                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
+            "Mitchell": {"cj-mitchell": "Mitchell", "john-logan": "John",
+                         "christian-isaac": "Christian", "grant-leif": "Leif",
+                         "kaleb-peter": "Peter", "adam-noah": "Noah"},
+            "Peter":    {"cj-mitchell": "Mitchell", "john-logan": "Logan",
+                         "christian-isaac": "Christian", "grant-leif": "Grant",
+                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
+        },
+        "missing": ["Isaac", "Christian", "Noah"],
     },
 }
 
@@ -664,15 +692,24 @@ def page(V, week, season, deep=()):
     if board_picks:
         A('<section id="boardpicks" class="card"><h2>Beat the Board — Picks</h2>')
         A(f'<p class="h2h"><b>As of</b> {E(board_picks["asof"])}</p>')
-        A('<table><thead><tr><th>Matchup</th><th>Votes</th><th>Note</th></tr></thead><tbody>')
-        for label, tally, note in board_picks["rows"]:
-            A(f'<tr><td>{E(label)}</td><td>{E(tally)}</td><td>{E(note)}</td></tr>')
+        A('<table><thead><tr><th>Owner</th>')
+        for label, _ in board_picks["matchups"]:
+            A(f'<th>{E(label)}</th>')
+        A('</tr></thead><tbody>')
+        for owner in board_picks["owners"]:
+            row = board_picks["picks"].get(owner)
+            A(f'<tr><td>{E(owner)}</td>')
+            for _, mid in board_picks["matchups"]:
+                pick = row.get(mid) if row else None
+                if pick is None:
+                    A('<td class="dim">—</td>')
+                elif pick == owner:
+                    A(f'<td><b>{E(pick)}</b>*</td>')
+                else:
+                    A(f'<td>{E(pick)}</td>')
+            A('</tr>')
         A('</tbody></table>')
-        if board_picks.get("notes"):
-            A('<h4>Notes</h4><ul class="over">')
-            for n in board_picks["notes"]:
-                A(f'<li>{E(n)}</li>')
-            A('</ul>')
+        A('<p class="h2h">* picked their own team</p>')
         if board_picks.get("missing"):
             A(f'<p class="h2h"><b>Still to pick</b> {E(", ".join(board_picks["missing"]))}</p>')
         A('</section>')
