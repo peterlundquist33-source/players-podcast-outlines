@@ -2,7 +2,12 @@
 """Build podcast outline pages from a Google Sheet export (tools/wk*.json)."""
 import json, html, re, sys, pathlib, collections
 
-ORDER = ["THURSDAY NIGHT GAME", "SUNDAY NOON GAME", "SUNDAY AFTERNOON GAME",
+# Chronological, so the matchup cards run in the order the games resolve. The
+# Thanksgiving and Black Friday slots only exist in a late-November week, where
+# the NFL puts real games on Wednesday, Thursday and Friday; a heading missing
+# from this list sorts to the end of the show instead of into its slot.
+ORDER = ["THURSDAY NIGHT GAME", "THANKSGIVING GAME", "BLACK FRIDAY GAME",
+         "SUNDAY NOON GAME", "SUNDAY AFTERNOON GAME",
          "SUNDAY NIGHT GAME", "MONDAY NIGHT GAME"]
 
 # The sheet's agenda column *is* the show rundown, so it also decides the order
@@ -47,6 +52,7 @@ def running_order(agenda):
 OWNERS = {
     "Uncut Cokerr": "Adam", "Joey Lunchbox": "Leif", "The Aura Farm": "Christian",
     "The Basement Of KK": "Peter", "Runnin' Rezac": "Logan", "Pukachu": "John",
+    "RIPukachu": "John",
     "Amon that inhaler": "Grant", "PA Dive Your Way": "Kaleb",
     "Finding Nico": "Mitchell", "A Slap in the Face": "Isaac",
     "Maye Be Cook'd": "Noah", "Maye, Quit Football": "Noah",
@@ -429,7 +435,12 @@ def total(agenda):
 
 def render_deep(A, E, m, slug):
     """Lineup card + window split + season form for one matchup."""
-    W = ["Thu", "Sun AM", "Sun Noon", "Sun Aft", "SNF", "MNF"]
+    # Take the window order from the data itself (enrich.py's WINDOWS) rather
+    # than a second hard-coded copy that can drift out of sync, then drop any
+    # window no game in this matchup falls in so the table stays narrow.
+    keys = list(m["windows"]["away"]) or list(m["windows"]["home"])
+    W = [w for w in keys
+         if m["windows"]["away"].get(w) or m["windows"]["home"].get(w)]
 
     fa, fh = m["form"]["away"], m["form"]["home"]
     if fa and fh:

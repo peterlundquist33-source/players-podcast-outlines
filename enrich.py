@@ -5,7 +5,8 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 SLOT_ORDER = ["QB", "RB", "WR", "TE", "FLEX", "D/ST", "K"]
-WINDOWS = ["Thu", "Sun AM", "Sun Noon", "Sun Aft", "SNF", "MNF"]
+WINDOWS = ["Wed", "Thu", "Fri", "Sat", "Sun AM", "Sun Noon", "Sun Aft",
+           "SNF", "MNF"]
 
 # The show is recorded and listened to on Central time, so every kickoff is
 # stated in Chicago wall-clock time rather than UTC or the stadium's zone.
@@ -96,8 +97,14 @@ def nfl_windows(season, week):
                 w = "Sun Aft"       # malformed/missing kickoff; bucket plainly
             else:
                 dow, hh = dt_et.strftime("%a"), dt_et.hour
-                if dow == "Thu":
-                    w = "Thu"
+                if dow in ("Wed", "Thu", "Fri", "Sat"):
+                    # Thanksgiving and late-season weeks put real games on
+                    # Wed/Fri/Sat. Before these had buckets they fell through
+                    # to the Sunday catch-all below, so Week 12 2026's
+                    # Wednesday night game and the Black Friday game both
+                    # read as "Sun Aft" — caught 2026-11-24 on the Week 12
+                    # build. The kickoff times themselves were always right.
+                    w = dow
                 elif dow == "Mon":
                     w = "MNF"
                 elif dow == "Sun" and hh >= 19:

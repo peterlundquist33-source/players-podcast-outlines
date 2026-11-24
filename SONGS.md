@@ -19,6 +19,7 @@ from, not the source of truth.
 | 9  | All I Do Is Win | DJ Khaled |
 | 10 | Enter Sandman | Metallica |
 | 11 | You Give Love a Bad Name | Bon Jovi |
+| 12 | Immigrant Song | Led Zeppelin |
 
 Check this list before filling `C5`. Week 7 reran Week 6's song.
 
@@ -43,7 +44,6 @@ Rock, in the lane the show already lives in:
 - Kickstart My Heart — Mötley Crüe
 - Sabotage — Beastie Boys
 - Bulls on Parade — Rage Against the Machine
-- Immigrant Song — Led Zeppelin
 - Blitzkrieg Bop — Ramones (two minutes, all payoff)
 - Seven Nation Army — The White Stripes (stadium chant)
 - Renegade — Styx (football-coded via the Steelers)
