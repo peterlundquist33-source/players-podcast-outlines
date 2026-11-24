@@ -33,8 +33,8 @@ COLS, ROWS = 21, 48          # A..U, matching the workbook's A1:U48 export
 # --------------------------------------------------------------- week content
 
 WEEK = 12
-RECORDING = "[ date ]"
-GUEST = "[ guest ]"
+RECORDING = "Nov 24, 2026"
+GUEST = "None"
 # Arena rock, unused, and the lyric points at a real Week 12 fact: it is
 # Thanksgiving week in a Minnesota league. Not one of SONGS.md's earmarked
 # songs, which are held for a bad-beat / Monday-decided / playoff-run week.
@@ -54,7 +54,10 @@ AGENDA = [
 ]
 
 PREDICTION_RECORD = "0-0"
-LOCK = "[ lock + short reason ]"
+# Peter's max-confidence (6-pt) Beat the Board pick doubles as the Lock.
+LOCK = ("Adam over Noah (6 pts) — ESPN has power-#1 Adam a 49% underdog to "
+        "3-8 Noah on the strength of his set lineup, but Noah's last in the "
+        "league in all-play at 31.4%. Fade the algorithm.")
 
 # Hot seat, rows 15-17: team in column B, evidence in column E. Ordered by
 # power-board severity after Week 11 — Noah #12, Peter #11, Kaleb #10.
@@ -114,49 +117,38 @@ AWARDS = [
 # Team of the Week, rows 28-37. Eight of twelve owners have already had it
 # (Logan W1, John W2, Adam W3, Isaac W4, Leif W6, CJ W7, Grant W10,
 # Christian W11), so the rotation rule leaves Peter, Kaleb, Mitchell and Noah
-# eligible. Mitchell is the only one with a case from the data: Week 11's
-# league-high 162.90. The call is still Peter's — swap C28:C33 and the roster
-# and this block regenerates.
-TOTW_META = [
-    ("Team Name", "Finding Nico"),
-    ("Owner", "Mitchell Max"),
-    ("Record", "4-7"),
-    ("Best Finish", "7-7 (2022, 2023, 2025)"),
-    ("Playoff Appearances", "2"),
-    ("Fun Fact",
-     "2025 runner-up as a 7-7 Cinderella seed, and 7-7 in three of his four "
-     "completed seasons. All-time best single week is 175.92 (Week 2, 2022); "
-     "Week 11's 162.90 is his best of 2026."),
-]
+# eligible, with Mitchell the strongest case (Week 11's league-high 162.90).
+# Peter cut the segment for Week 12 (2026-11-24) rather than spend it on a
+# default pick — TOTW_SKIPPED carries the note and the block below renders
+# nothing else. Un-skip by filling TOTW_META/TOTW_ROSTER/IMPACT again.
+TOTW_SKIPPED = ("Skipped this week. Still eligible: Peter, Kaleb, Mitchell, "
+                "Noah — Mitchell's the strongest case (Week 11's league-high "
+                "162.90) if it comes back.")
+TOTW_META = []
 
 # (slot, player, draft round, current rank). "FA" marks a player this owner
 # did not draft — the convention Week 6 used for Leif's traded-in Mike Evans.
 # Ranks are 2026 points scored among league-rostered players at that position.
-TOTW_ROSTER = [
-    ("QB",   "Dak Prescott",   "FA", "QB #2"),
-    ("RB",   "Jahmyr Gibbs",   "1",  "RB #1"),
-    ("RB",   "Jordan Mason",   "FA", "RB #48"),
-    ("WR",   "Nico Collins",   "2",  "WR #19"),
-    ("WR",   "DJ Moore",       "5",  "WR #28"),
-    ("TE",   "Travis Kelce",   "10", "TE #5"),
-    ("FLEX", "Tyler Warren",   "4",  "TE #12"),
-    ("D/ST", "Broncos D/ST",   "12", "D/ST #5"),
-    ("K",    "Dominic Zvada",  "FA", "K #13"),
-]
+TOTW_ROSTER = []
 
-IMPACT = [
-    "Dak Prescott — 35.90 on a 21.9 projection, the top individual score of "
-    "Week 11 and QB #2 in the league this season (237.8); came over from Peter "
-    "in the Sept. 24 trade",
-    "Travis Kelce — 25.40 on 11.3, the roster's biggest overperformance "
-    "(+14.1); the Rd-10 pick, now TE #5",
-    "Jahmyr Gibbs — 27.80 on 21.9, RB #1 in the league on the season (281.2); "
-    "the Rd-1 pick",
-    "DJ Moore — 23.10 on 13.7 (+9.4); the Rd-5 pick",
-    "Dominic Zvada — 16.00 on 9.4 (+6.6) from an undrafted kicker",
-]
+IMPACT = []
 
-PICK = "[ Peter's pick + roast / reasoning ]"
+# Peter's Beat the Board picks for Week 12, in slate order (matches MATCHUPS
+# below), with his confidence points out of 6. Pulled straight from his
+# submitted Firestore entry, not invented.
+PICK = [
+    "Mitchell (4 pts) — backing the hot hand (league-high 162.90 last week) "
+    "over CJ's depth.",
+    "Logan (3 pts) — weird things keep happening for him, and he dodges the "
+    "Coleman/Warren collision entirely.",
+    "Christian (5 pts) — betting the bad-luck power #2 bounces back against "
+    "Isaac's projection lead.",
+    "Grant (1 pt) — lowest confidence on the board, leaning on the "
+    "power-ranking gap over Leif's better record.",
+    "Peter (2 pts) — the week's biggest favorite (61%) and he still only "
+    "trusts himself for 2 points.",
+    "Adam (6 pts) — also his Lock of the Week; see above.",
+]
 
 # Matchup blocks, in slate order. Each lands at rows r/r+1/r+2/r+3/r+4 and
 # r+7/r+8 of its column pair, anchored at rows 4, 17 and 30 in columns I and N.
@@ -374,21 +366,18 @@ def compose():
         put(21 + i, "C", body)
         put(21 + i, "E", who)
 
-    # team of the week, rows 27-39
+    # team of the week, rows 27-39 — cut for Week 12 (2026-11-24, Peter's
+    # call); just the header and a skip note, no roster headers or rows.
     put(27, "B", "TEAM OF THE WEEK")
-    put(28, "D", "Position")
-    put(28, "E", "Name")
-    put(28, "F", "Draft Rd.")
-    put(28, "G", "Current Rank")
+    put(28, "B", TOTW_SKIPPED)
     for i, (label, val) in enumerate(TOTW_META):
-        put(28 + i, "B", label)
-        put(28 + i, "C", val)
+        put(29 + i, "B", label)
+        put(29 + i, "C", val)
     for i, (slot, name, rd, rank) in enumerate(TOTW_ROSTER):
         put(29 + i, "D", slot)
         put(29 + i, "E", name)
         put(29 + i, "F", rd)
         put(29 + i, "G", rank)
-    put(34, "B", "Impact Players")
     for i, line in enumerate(IMPACT):
         put(35 + i, "B", i + 1)
         put(35 + i, "C", line)
@@ -397,7 +386,9 @@ def compose():
     anchors = [(r, L, R) for r in (4, 17, 30) for L, R in (("I", "K"), ("N", "P"))]
     if len(MATCHUPS) != len(anchors):
         raise SystemExit(f"{len(MATCHUPS)} matchups for {len(anchors)} blocks")
-    for m, (r, L, R) in zip(MATCHUPS, anchors):
+    if len(PICK) != len(MATCHUPS):
+        raise SystemExit(f"{len(PICK)} picks for {len(MATCHUPS)} matchups")
+    for m, pick, (r, L, R) in zip(MATCHUPS, PICK, anchors):
         put(r, L, m["slot"])
         put(r + 1, L, m["away"])
         put(r + 1, "J" if L == "I" else "O", "vs.")
@@ -409,7 +400,7 @@ def compose():
         put(r + 3, L, "Trend / stat\n" + m["trend"])
         put(r + 4, L, "ALL-TIME H2H\n" + m["h2h"])
         put(r + 7, L, "PREDICTION")
-        put(r + 8, L, PICK)
+        put(r + 8, L, pick)
 
     # Peter's notes, rows 43-48
     put(43, "B", "PETER'S NOTES / VOICE DUMP")
