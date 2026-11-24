@@ -262,36 +262,47 @@ BOARD_PICKS = {
         # Rows, same owner grouping as the columns above.
         "owners": ["CJ", "Mitchell", "John", "Logan", "Christian", "Isaac",
                    "Grant", "Leif", "Kaleb", "Peter", "Adam", "Noah"],
+        # (pick, confidence 1-6) per owner per matchup.
         "picks": {
-            "Adam":     {"cj-mitchell": "Mitchell", "john-logan": "Logan",
-                         "christian-isaac": "Isaac", "grant-leif": "Grant",
-                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
-            "CJ":       {"cj-mitchell": "CJ", "john-logan": "Logan",
-                         "christian-isaac": "Christian", "grant-leif": "Grant",
-                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
-            "Grant":    {"cj-mitchell": "Mitchell", "john-logan": "John",
-                         "christian-isaac": "Isaac", "grant-leif": "Leif",
-                         "kaleb-peter": "Kaleb", "adam-noah": "Adam"},
-            "John":     {"cj-mitchell": "Mitchell", "john-logan": "John",
-                         "christian-isaac": "Isaac", "grant-leif": "Grant",
-                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
-            "Kaleb":    {"cj-mitchell": "Mitchell", "john-logan": "Logan",
-                         "christian-isaac": "Christian", "grant-leif": "Grant",
-                         "kaleb-peter": "Kaleb", "adam-noah": "Adam"},
-            "Leif":     {"cj-mitchell": "Mitchell", "john-logan": "John",
-                         "christian-isaac": "Isaac", "grant-leif": "Grant",
-                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
-            "Logan":    {"cj-mitchell": "Mitchell", "john-logan": "Logan",
-                         "christian-isaac": "Christian", "grant-leif": "Grant",
-                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
-            "Mitchell": {"cj-mitchell": "Mitchell", "john-logan": "John",
-                         "christian-isaac": "Christian", "grant-leif": "Leif",
-                         "kaleb-peter": "Peter", "adam-noah": "Noah"},
-            "Peter":    {"cj-mitchell": "Mitchell", "john-logan": "Logan",
-                         "christian-isaac": "Christian", "grant-leif": "Grant",
-                         "kaleb-peter": "Peter", "adam-noah": "Adam"},
+            "Adam":     {"cj-mitchell": ("Mitchell", 4), "john-logan": ("Logan", 2),
+                         "christian-isaac": ("Isaac", 3), "grant-leif": ("Grant", 1),
+                         "kaleb-peter": ("Peter", 5), "adam-noah": ("Adam", 6)},
+            "CJ":       {"cj-mitchell": ("CJ", 4), "john-logan": ("Logan", 2),
+                         "christian-isaac": ("Christian", 3), "grant-leif": ("Grant", 1),
+                         "kaleb-peter": ("Peter", 5), "adam-noah": ("Adam", 6)},
+            "Grant":    {"cj-mitchell": ("Mitchell", 2), "john-logan": ("John", 1),
+                         "christian-isaac": ("Isaac", 4), "grant-leif": ("Leif", 3),
+                         "kaleb-peter": ("Kaleb", 5), "adam-noah": ("Adam", 6)},
+            "John":     {"cj-mitchell": ("Mitchell", 5), "john-logan": ("John", 1),
+                         "christian-isaac": ("Isaac", 3), "grant-leif": ("Grant", 2),
+                         "kaleb-peter": ("Peter", 4), "adam-noah": ("Adam", 6)},
+            "Kaleb":    {"cj-mitchell": ("Mitchell", 4), "john-logan": ("Logan", 5),
+                         "christian-isaac": ("Christian", 6), "grant-leif": ("Grant", 2),
+                         "kaleb-peter": ("Kaleb", 1), "adam-noah": ("Adam", 3)},
+            "Leif":     {"cj-mitchell": ("Mitchell", 3), "john-logan": ("John", 1),
+                         "christian-isaac": ("Isaac", 4), "grant-leif": ("Grant", 2),
+                         "kaleb-peter": ("Peter", 5), "adam-noah": ("Adam", 6)},
+            "Logan":    {"cj-mitchell": ("Mitchell", 5), "john-logan": ("Logan", 2),
+                         "christian-isaac": ("Christian", 4), "grant-leif": ("Grant", 1),
+                         "kaleb-peter": ("Peter", 3), "adam-noah": ("Adam", 6)},
+            "Mitchell": {"cj-mitchell": ("Mitchell", 1), "john-logan": ("John", 4),
+                         "christian-isaac": ("Christian", 6), "grant-leif": ("Leif", 5),
+                         "kaleb-peter": ("Peter", 3), "adam-noah": ("Noah", 2)},
+            "Peter":    {"cj-mitchell": ("Mitchell", 4), "john-logan": ("Logan", 3),
+                         "christian-isaac": ("Christian", 5), "grant-leif": ("Grant", 1),
+                         "kaleb-peter": ("Peter", 2), "adam-noah": ("Adam", 6)},
         },
         "missing": ["Isaac", "Christian", "Noah"],
+        # Majority pick per matchup: (team, vote count, avg confidence among
+        # those backers). Computed straight off the picks above.
+        "majority": {
+            "cj-mitchell": ("Mitchell", 8, 3.5),
+            "john-logan": ("Logan", 5, 2.8),
+            "christian-isaac": ("Christian", 5, 4.8),
+            "grant-leif": ("Grant", 7, 1.4),
+            "kaleb-peter": ("Peter", 7, 3.9),
+            "adam-noah": ("Adam", 8, 5.6),
+        },
     },
 }
 
@@ -700,16 +711,26 @@ def page(V, week, season, deep=()):
             row = board_picks["picks"].get(owner)
             A(f'<tr><td>{E(owner)}</td>')
             for _, mid in board_picks["matchups"]:
-                pick = row.get(mid) if row else None
-                if pick is None:
+                entry = row.get(mid) if row else None
+                if entry is None:
                     A('<td class="dim">—</td>')
-                elif pick == owner:
-                    A(f'<td><b>{E(pick)}</b>*</td>')
                 else:
-                    A(f'<td>{E(pick)}</td>')
+                    pick, conf = entry
+                    text = f'{E(pick)} ({conf})'
+                    A(f'<td><b>{text}</b>*</td>' if pick == owner else f'<td>{text}</td>')
+            A('</tr>')
+        if board_picks.get("majority"):
+            A('<tr class="dim"><td><b>Majority avg conf</b></td>')
+            for _, mid in board_picks["matchups"]:
+                m = board_picks["majority"].get(mid)
+                if m:
+                    team, n, avg = m
+                    A(f'<td>{E(team)} {avg} avg ({n})</td>')
+                else:
+                    A('<td>—</td>')
             A('</tr>')
         A('</tbody></table>')
-        A('<p class="h2h">* picked their own team</p>')
+        A('<p class="h2h">* picked their own team · number in parens is confidence points (1-6)</p>')
         if board_picks.get("missing"):
             A(f'<p class="h2h"><b>Still to pick</b> {E(", ".join(board_picks["missing"]))}</p>')
         A('</section>')
