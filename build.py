@@ -639,9 +639,12 @@ def page(V, week, season, deep=()):
                      slug(m["away"] + "-" + m["home"])) for m in b]
         return []
 
-    nav = [("Agenda", "agenda")] if agenda else []
+    nav = [("Beat the Board — Picks", "boardpicks")] if board_picks else []
+    if agenda:
+        nav.append(("Agenda", "agenda"))
     for key in order:
-        nav.extend(nav_for(key))
+        if key != "boardpicks":
+            nav.extend(nav_for(key))
 
     A('<div class="bar"><a class="back" href="index.html">← Weeks</a>')
     A('<details class="menu"><summary>Jump to<span class="car">▾</span></summary><nav>')
@@ -655,6 +658,24 @@ def page(V, week, season, deep=()):
     if guest: A(f'<span><b>Guest</b> {E(guest)}</span>')
     if song:  A(f'<span><b>Intro</b> {E(song)}</span>')
     A('</div></header><main>')
+
+    # Beat the Board picks render first — Peter wants it at the top of the
+    # page, above the Agenda, not down with the rest of the rundown.
+    if board_picks:
+        A('<section id="boardpicks" class="card"><h2>Beat the Board — Picks</h2>')
+        A(f'<p class="h2h"><b>As of</b> {E(board_picks["asof"])}</p>')
+        A('<table><thead><tr><th>Matchup</th><th>Votes</th><th>Note</th></tr></thead><tbody>')
+        for label, tally, note in board_picks["rows"]:
+            A(f'<tr><td>{E(label)}</td><td>{E(tally)}</td><td>{E(note)}</td></tr>')
+        A('</tbody></table>')
+        if board_picks.get("notes"):
+            A('<h4>Notes</h4><ul class="over">')
+            for n in board_picks["notes"]:
+                A(f'<li>{E(n)}</li>')
+            A('</ul>')
+        if board_picks.get("missing"):
+            A(f'<p class="h2h"><b>Still to pick</b> {E(", ".join(board_picks["missing"]))}</p>')
+        A('</section>')
 
     if agenda:
         A('<section id="agenda" class="card agenda"><h2>Agenda</h2><ol>')
@@ -792,29 +813,12 @@ def page(V, week, season, deep=()):
               f'<dd>{E(note)}<span class="who">{E(team)} · {E(owner)}</span></dd>')
         A('</dl></section>')
 
-    def emit_board_picks():
-        if not board_picks: return
-        A('<section id="boardpicks" class="card"><h2>Beat the Board — Picks</h2>')
-        A(f'<p class="h2h"><b>As of</b> {E(board_picks["asof"])}</p>')
-        A('<table><thead><tr><th>Matchup</th><th>Votes</th><th>Note</th></tr></thead><tbody>')
-        for label, tally, note in board_picks["rows"]:
-            A(f'<tr><td>{E(label)}</td><td>{E(tally)}</td><td>{E(note)}</td></tr>')
-        A('</tbody></table>')
-        if board_picks.get("notes"):
-            A('<h4>Notes</h4><ul class="over">')
-            for n in board_picks["notes"]:
-                A(f'<li>{E(n)}</li>')
-            A('</ul>')
-        if board_picks.get("missing"):
-            A(f'<p class="h2h"><b>Still to pick</b> {E(", ".join(board_picks["missing"]))}</p>')
-        A('</section>')
-
     emit = {"recap": emit_recap, "awards": emit_awards, "trades": emit_trades,
             "hotseat": emit_hotseat, "totw": emit_totw,
-            "matchups": emit_matchups, "drinks": emit_drinks,
-            "boardpicks": emit_board_picks}
+            "matchups": emit_matchups, "drinks": emit_drinks}
     for key in order:
-        emit[key]()
+        if key in emit:          # boardpicks already rendered above, at the top
+            emit[key]()
 
     A('</main><footer>Players FF Podcast · outline</footer></body></html>')
     return "\n".join(P)
@@ -860,6 +864,10 @@ def check_order(doc):
     body = doc.split("<main>", 1)[1]
     rows = re.findall(r"<li><span>(.*?)</span><em>", body.split("</ol>", 1)[0])
     order = running_order([(html.unescape(r), "") for r in rows])
+    # Beat the Board picks are intentionally hoisted above the Agenda card
+    # itself (Peter's call, 2026-11-24), not just reordered within the
+    # agenda's own rundown, so the rundown check doesn't apply to it.
+    order = [k for k in order if k != "boardpicks"]
     seen = [(body.index(m), key) for key in order
             for m in [MARKER.get(key, f'id="{key}"')] if m in body]
     bad = []
