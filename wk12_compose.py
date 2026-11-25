@@ -44,11 +44,11 @@ SONG = "Immigrant Song — Led Zeppelin"
 # the workbook has ever filled it, so it is left empty rather than invented.
 AGENDA = [
     "Welcome Back",
-    "Thanksgiving: What Every GM Is Thankful For",
     "Last Week: Predictions vs. Results",
     "Weekly Awards + Analytics",
     "Trades + Waiver Moves",
     "Hot Seat",
+    "Team of the Week",
     "Matchups",
     "Lock of the Week",
 ]
