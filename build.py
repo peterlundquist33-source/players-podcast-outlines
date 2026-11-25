@@ -17,6 +17,7 @@ ORDER = ["THURSDAY NIGHT GAME", "THANKSGIVING GAME", "BLACK FRIDAY GAME",
 # host actually reaches them. Each key lists the substrings an agenda row may
 # use for it; first match wins, so keep the more specific patterns earlier.
 RUNDOWN = [
+    ("thankful", ("thankful", "thanksgiving")),
     ("recap",    ("last week", "predictions vs")),
     ("awards",   ("award",)),
     ("trades",   ("trade",)),
@@ -247,6 +248,41 @@ BEACH_DRINKS = {
 # tools/board.py fetch_picks()), not from the sheet. These are a snapshot as
 # of composition time; picks stay open until the Thursday lock, so re-pull
 # before recording if it matters.
+THANKFUL = {
+    12: {
+        "title": "What Every GM Should Be Thankful For",
+        "lead": ("Before we carve up Week 12, let’s give every GM one thing "
+                 "to be thankful for—because some of these records need more "
+                 "grace than gravy."),
+        "items": [
+            ("Leif", "Christian McCaffrey",
+             "A healthy CMC remains fantasy football’s closest thing to legal cheating."),
+            ("Adam", "Jaxon Smith-Njigba and, strictly for fantasy purposes, Baker Mayfield’s injury",
+             "JSN became the WR1, while Tampa Bay became run-first and turned Bucky Irving back into a fantasy stud. Morally complicated; statistically wonderful."),
+            ("Kaleb", "the health of Breece Hall and Ashton Jeanty",
+             "They’re his only healthy running backs, so every untouched knee ligament deserves a place at the Thanksgiving table."),
+            ("John", "the league switching to FAAB",
+             "Under the old waiver-order system, Jonah Coleman lands on somebody else’s roster. Instead, John bought himself a running back who immediately dropped 34.9 points."),
+            ("CJ", "Chuba Hubbard",
+             "Quietly producing like a top-tier running back while receiving almost none of the respect."),
+            ("Christian", "CeeDee Lamb",
+             "A true lineup anchor on a roster built to be far better than 5-6."),
+            ("Logan", "the ability to trade players",
+             "He turned Saquon Barkley, J.K. Dobbins and Jalen Hurts into Joe Burrow, Jaylen Warren and Zach Charbonnet. His roster is basically a Ship of Theseus."),
+            ("Grant", "Amon-Ra St. Brown",
+             "Elite production, elite consistency and Thanksgiving football."),
+            ("Isaac", "Ja’Marr Chase",
+             "Week 12’s highest individual projection and a permanent matchup eraser."),
+            ("Peter", "the first four weeks of the season",
+             "Bijan Robinson, Lamar Jackson and Tee Higgins carried him to a 4-0 start, building the cushion his roster has spent the last seven weeks trying to erase."),
+            ("Mitchell", "Jahmyr Gibbs and Peter Lundquist",
+             "Gibbs is the RB1, and Peter traded him Dak Prescott—now the QB2—in a deal everyone mocked Mitchell for initially. The apology line is open."),
+            ("Noah", "James Cook and the Colts trading Josh Downs to Kansas City",
+             "He already has a top-five running back, and now Downs gets Patrick Mahomes instead of the Indianapolis quarterback carousel. That’s two answered prayers."),
+        ],
+    },
+}
+
 BOARD_PICKS = {
     12: {
         "asof": "Nov 24, 2:17p CT — 9 of 12 submitted",
@@ -625,6 +661,7 @@ def page(V, week, season, deep=()):
     recap = RECAP.get(int(week))
     trades = TRADES.get(int(week))
     drinks = BEACH_DRINKS.get(int(week))
+    thankful = THANKFUL.get(int(week))
     board_picks = BOARD_PICKS.get(int(week))
     if trades:
         # Verified trades are in hand, so the sheet's "Trades + Waiver Moves"
@@ -671,6 +708,7 @@ def page(V, week, season, deep=()):
         if key == "totw":    return [("Team of the Week", "totw")] if totw_roster else []
         if key == "hotseat": return [("Hot Seat", "hotseat")] if hotseat else []
         if key == "drinks":  return [(drinks["title"], "drinks")] if drinks else []
+        if key == "thankful": return [(thankful["title"], "thankful")] if thankful else []
         if key == "boardpicks":
             return [("Beat the Board — Picks", "boardpicks")] if board_picks else []
         if key == "matchups":
@@ -678,11 +716,13 @@ def page(V, week, season, deep=()):
                      slug(m["away"] + "-" + m["home"])) for m in b]
         return []
 
-    nav = [("Beat the Board — Picks", "boardpicks")] if board_picks else []
+    nav = [(thankful["title"], "thankful")] if thankful else []
+    if board_picks:
+        nav.append(("Beat the Board — Picks", "boardpicks"))
     if agenda:
         nav.append(("Agenda", "agenda"))
     for key in order:
-        if key != "boardpicks":
+        if key not in ("thankful", "boardpicks"):
             nav.extend(nav_for(key))
 
     A('<div class="bar"><a class="back" href="index.html">← Weeks</a>')
@@ -698,8 +738,18 @@ def page(V, week, season, deep=()):
     if song:  A(f'<span><b>Intro</b> {E(song)}</span>')
     A('</div></header><main>')
 
-    # Beat the Board picks render first — Peter wants it at the top of the
-    # page, above the Agenda, not down with the rest of the rundown.
+    # Thanksgiving gratitude renders first — Peter wants it at the very top
+    # of the Week 12 outline, above Beat the Board and the Agenda.
+    if thankful:
+        A(f'<section id="thankful" class="card"><h2>{E(thankful["title"])}</h2>')
+        A(f'<p class="h2h">{E(thankful["lead"])}</p>')
+        A('<ol class="impact">')
+        for owner, subject, note in thankful["items"]:
+            A(f'<li><b>{E(owner)} — {E(subject)}.</b> {E(note)}</li>')
+        A('</ol></section>')
+
+    # Beat the Board picks also render above the Agenda, immediately after
+    # the Thanksgiving segment when that Week 12-only segment is present.
     if board_picks:
         A('<section id="boardpicks" class="card"><h2>Beat the Board — Picks</h2>')
         A(f'<p class="h2h"><b>As of</b> {E(board_picks["asof"])}</p>')
@@ -875,7 +925,7 @@ def page(V, week, season, deep=()):
             "hotseat": emit_hotseat, "totw": emit_totw,
             "matchups": emit_matchups, "drinks": emit_drinks}
     for key in order:
-        if key in emit:          # boardpicks already rendered above, at the top
+        if key in emit:  # thankful and boardpicks already rendered above
             emit[key]()
 
     A('</main><footer>Players FF Podcast · outline</footer></body></html>')
@@ -922,10 +972,9 @@ def check_order(doc):
     body = doc.split("<main>", 1)[1]
     rows = re.findall(r"<li><span>(.*?)</span><em>", body.split("</ol>", 1)[0])
     order = running_order([(html.unescape(r), "") for r in rows])
-    # Beat the Board picks are intentionally hoisted above the Agenda card
-    # itself (Peter's call, 2026-11-24), not just reordered within the
-    # agenda's own rundown, so the rundown check doesn't apply to it.
-    order = [k for k in order if k != "boardpicks"]
+    # Thanksgiving gratitude and Beat the Board are intentionally hoisted
+    # above the Agenda card itself, so the rundown check doesn't apply to them.
+    order = [k for k in order if k not in ("thankful", "boardpicks")]
     seen = [(body.index(m), key) for key in order
             for m in [MARKER.get(key, f'id="{key}"')] if m in body]
     bad = []
